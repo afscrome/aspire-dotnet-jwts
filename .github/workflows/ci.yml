@@ -29,11 +29,9 @@ jobs:
       - name: 🔨 Build
         run: dotnet build aspirefriday.slnx --no-restore --configuration Release
 
-      - name: 🌀 Install Aspire CLI
-        run: curl -sSL https://aspire.dev/install.sh | bash
-
       - name: 🔒 Trust dev certs
-        run: aspire certs trust --debug
+        run: dotnet dev-certs https --trust
+        continue-on-error: true
 
       - name: 🧪 Test
         run: dotnet run --project aspirefriday.Tests/aspirefriday.Tests.csproj --no-build --configuration Release
