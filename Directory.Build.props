@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Alex Crome</Authors>
+  </PropertyGroup>
+</Project>
