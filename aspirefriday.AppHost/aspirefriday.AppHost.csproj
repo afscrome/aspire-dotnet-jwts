@@ -10,9 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\aspirefriday.ApiService\aspirefriday.ApiService.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\AspireFriday.Hosting.UserJwts\AspireFriday.Hosting.UserJwts.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 

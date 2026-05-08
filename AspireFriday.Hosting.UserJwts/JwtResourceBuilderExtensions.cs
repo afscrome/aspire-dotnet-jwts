@@ -60,15 +60,20 @@ public static class JwtResourceBuilderExtensions
     public static IResourceBuilder<SigningTokenResource> AddJwtSigningToken(
         this IDistributedApplicationBuilder builder,
         string name,
-        string issuer,
-        IResourceBuilder<ParameterResource> signingKeyParameter)
+        string issuer)
     {
+        var jwtSigningKey = builder.AddParameter(
+            "jwt-signing-key",
+            new Base64ParameterDefault(32),
+            secret: true,
+            persist: true);
+
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(issuer);
-        ArgumentNullException.ThrowIfNull(signingKeyParameter);
+        ArgumentNullException.ThrowIfNull(jwtSigningKey);
 
-        var resource = new SigningTokenResource(name, issuer, signingKeyParameter);
+        var resource = new SigningTokenResource(name, issuer, jwtSigningKey);
         var state = new CustomResourceSnapshot
         {
             ResourceType = "SigningToken",
@@ -185,3 +190,22 @@ public static class JwtResourceBuilderExtensions
 }
 
 #pragma warning restore ASPIREINTERACTION001
+
+internal sealed class Base64ParameterDefault(int byteLength) : Aspire.Hosting.ApplicationModel.ParameterDefault
+{
+    public int ByteLength { get; } = byteLength > 0
+        ? byteLength
+        : throw new ArgumentOutOfRangeException(nameof(byteLength));
+
+    public override string GetDefaultValue()
+    {
+        return Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(ByteLength));
+    }
+
+    public override void WriteToManifest(Aspire.Hosting.Publishing.ManifestPublishingContext context)
+    {
+        context.Writer.WriteStartObject("generateBase64");
+        context.Writer.WriteNumber("byteLength", ByteLength);
+        context.Writer.WriteEndObject();
+    }
+}

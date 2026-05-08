@@ -2,17 +2,9 @@ using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var jwtSigningKey = builder.AddParameter(
-    "jwt-signing-key",
-    new Base64ParameterDefault(32),
-    secret: true,
-    persist: true);
-
-
 var signingKey = builder.AddJwtSigningToken(
     name: "signing-key",
-    issuer: "dotnet-user-jwts",
-    signingKeyParameter: jwtSigningKey);
+    issuer: "dotnet-user-jwts");
 
 var apiService = builder.AddProject<Projects.aspirefriday_ApiService>("apiservice")
     .WithHttpHealthCheck("/health")
@@ -44,21 +36,3 @@ var scalar = builder.AddScalarApiReference()
 
 builder.Build().Run();
 
-internal sealed class Base64ParameterDefault(int byteLength) : Aspire.Hosting.ApplicationModel.ParameterDefault
-{
-    public int ByteLength { get; } = byteLength > 0
-        ? byteLength
-        : throw new ArgumentOutOfRangeException(nameof(byteLength));
-
-    public override string GetDefaultValue()
-    {
-        return Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(ByteLength));
-    }
-
-    public override void WriteToManifest(Aspire.Hosting.Publishing.ManifestPublishingContext context)
-    {
-        context.Writer.WriteStartObject("generateBase64");
-        context.Writer.WriteNumber("byteLength", ByteLength);
-        context.Writer.WriteEndObject();
-    }
-}

@@ -15,7 +15,27 @@ public class WebTests
         // Arrange
         var cancellationToken = new CancellationTokenSource(DefaultTimeout).Token;
 
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.aspirefriday_AppHost>(cancellationToken);
+        var appHost = DistributedApplicationTestingBuilder.Create();
+
+        var signingKey = appHost.AddJwtSigningToken(
+            name: "signing-key",
+            issuer: "dotnet-user-jwts");
+
+        var apiService = appHost.AddProject<Projects.aspirefriday_ApiService>("apiservice")
+            .WithHttpHealthCheck("/health")
+            .WithJwtToken(
+                signingKey,
+                commandName: "generate-jwt",
+                displayName: "Generate User JWT",
+                description: "Mints a signed user JWT bearer token using the configured static signing key.",
+                defaultClaims: new Dictionary<string, JwtClaimDefault>
+                {
+                    ["sub"] = new("dev-user", UserConfigurable: true, Label: "User ID", Description: "Value used for the sub claim."),
+                    ["type"] = new("user"),
+                    ["thing"] = new("1", UserConfigurable: true, Label: "Thing claim")
+                });
+
+
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
 #pragma warning disable EXTEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
@@ -72,11 +92,25 @@ public class WebTests
         // Arrange
         var cancellationToken = new CancellationTokenSource(DefaultTimeout).Token;
 
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.aspirefriday_AppHost>(cancellationToken);
-        appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
-        });
+        var appHost = DistributedApplicationTestingBuilder.Create();
+
+        var signingKey = appHost.AddJwtSigningToken(
+            name: "signing-key",
+            issuer: "dotnet-user-jwts");
+
+        var apiService = appHost.AddProject<Projects.aspirefriday_ApiService>("apiservice")
+            .WithHttpHealthCheck("/health")
+            .WithJwtToken(
+                signingKey,
+                commandName: "generate-service-jwt",
+                displayName: "Generate Service JWT",
+                description: "Mints a signed service JWT bearer token using the configured static signing key.",
+                defaultClaims: new Dictionary<string, JwtClaimDefault>
+                {
+                    ["sub"] = new("dev-service", UserConfigurable: true, Label: "App ID", Description: "Application identifier used for the sub claim."),
+                    ["type"] = new("service"),
+                    ["thing"] = new("1", UserConfigurable: true, Label: "Thing claim")
+                });
 
         await using var app = await appHost.BuildAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
         await app.StartAsync(cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
