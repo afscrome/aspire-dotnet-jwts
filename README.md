@@ -2,7 +2,10 @@
 
 `AspiriFriday.Hosting.UserJwts` is a small Aspire hosting integration that gives you a `dotnet user-jwts`-style developer experience for distributed apps.
 
-<video src="docs/demo.mp4" autoplay loop muted playsinline></video>
+> [!WARNING]
+> This package is under active development. The API may change without notice.
+
+![Demo of generating a token in the Aspire dashboard](docs/demo.gif)
 
 ```cs
 var signingKey = builder.AddJwtSigningToken("signing-key");
