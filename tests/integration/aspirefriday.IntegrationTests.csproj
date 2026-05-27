@@ -11,12 +11,11 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" Version="13.3.0" />
-    <PackageReference Include="TUnit" Version="1.43.11" />
+    <PackageReference Include="TUnit" Version="1.43.41" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\aspirefriday.ApiService\aspirefriday.ApiService.csproj" />
-    <ProjectReference Include="..\AspireFriday.Hosting.UserJwts\AspireFriday.Hosting.UserJwts.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\..\src\AspireFriday.Hosting.UserJwts\AspireFriday.Hosting.UserJwts.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 
   <ItemGroup>

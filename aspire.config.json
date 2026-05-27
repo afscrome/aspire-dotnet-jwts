@@ -1,5 +1,5 @@
 {
   "appHost": {
-    "path": "aspirefriday.AppHost/aspirefriday.AppHost.csproj"
+    "path": "playground/AppHost/aspirefriday.AppHost.csproj"
   }
 }

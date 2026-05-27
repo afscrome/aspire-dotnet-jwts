@@ -1,7 +1,7 @@
 <Solution>
-  <Project Path="aspirefriday.ApiService/aspirefriday.ApiService.csproj" />
-  <Project Path="aspirefriday.AppHost/aspirefriday.AppHost.csproj" />
-  <Project Path="AspireFriday.Hosting.UserJwts/AspireFriday.Hosting.UserJwts.csproj" />
-  <Project Path="aspirefriday.ServiceDefaults/aspirefriday.ServiceDefaults.csproj" />
-  <Project Path="aspirefriday.Tests/aspirefriday.Tests.csproj" />
+  <Project Path="playground/DotnetAppWithAuth/aspirefriday.ApiService.csproj" />
+  <Project Path="playground/AppHost/aspirefriday.AppHost.csproj" />
+  <Project Path="src/AspireFriday.Hosting.UserJwts/AspireFriday.Hosting.UserJwts.csproj" />
+  <Project Path="tests/integration/aspirefriday.IntegrationTests.csproj" />
+  <Project Path="tests/unit/aspirefriday.UnitTests.csproj" />
 </Solution>

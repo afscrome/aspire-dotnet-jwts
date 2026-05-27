@@ -9,12 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\aspirefriday.ApiService\aspirefriday.ApiService.csproj" />
-    <ProjectReference Include="..\AspireFriday.Hosting.UserJwts\AspireFriday.Hosting.UserJwts.csproj" IsAspireProjectResource="false" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Scalar.Aspire" Version="0.9.34" />
+    <ProjectReference Include="..\DotnetAppWithAuth\aspirefriday.ApiService.csproj" />
+    <ProjectReference Include="..\..\src\AspireFriday.Hosting.UserJwts\AspireFriday.Hosting.UserJwts.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 
 </Project>

@@ -34,7 +34,7 @@ jobs:
         continue-on-error: true
 
       - name: 🧪 Test
-        run: dotnet run --project aspirefriday.Tests/aspirefriday.Tests.csproj --no-build --configuration Release
+        run: dotnet test --configuration Release
 
   publish:
     name: 📦 Publish
@@ -60,7 +60,7 @@ jobs:
         run: echo "VERSION=0.0.${{ github.run_number }}-preview" >> $GITHUB_OUTPUT
 
       - name: 📦 Pack
-        run: dotnet pack AspireFriday.Hosting.UserJwts/AspireFriday.Hosting.UserJwts.csproj --configuration Release --output ./nupkg -p:Version=${{ steps.version.outputs.VERSION }}
+        run: dotnet pack src/AspireFriday.Hosting.UserJwts/AspireFriday.Hosting.UserJwts.csproj --configuration Release --output ./nupkg -p:Version=${{ steps.version.outputs.VERSION }}
 
       - name: 🚀 Publish to GitHub Packages
         run: dotnet nuget push ./nupkg/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate

@@ -2,5 +2,7 @@
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Alex Crome</Authors>
+    <ArtifactPathLayout>true</ArtifactPathLayout>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\$(MSBuildProjectName)\bin\**;$(MSBuildProjectDirectory)\$(MSBuildProjectName)\obj\**</DefaultItemExcludes>
   </PropertyGroup>
 </Project>
