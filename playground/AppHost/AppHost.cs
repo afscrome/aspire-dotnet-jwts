@@ -2,7 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var signingKey = builder.AddJwtSigningToken("signing-key");
 
-builder.AddProject<Projects.aspirefriday_ApiService>("apiservice")
+builder.AddProject<Projects.aspirifriday_ApiService>("apiservice")
     .WithHttpHealthCheck("/health")
     .WithJwtToken(
         signingKey,

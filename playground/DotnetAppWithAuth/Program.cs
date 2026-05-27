@@ -1,4 +1,4 @@
-using aspirefriday.ApiService;
+using aspirifriday.ApiService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using OpenTelemetry;

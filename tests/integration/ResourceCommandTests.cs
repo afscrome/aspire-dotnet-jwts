@@ -1,4 +1,4 @@
-namespace aspirefriday.Tests;
+namespace aspirifriday.Tests;
 
 [Timeout(30_000)]
 public class ResourceCommandTests

@@ -1,6 +1,6 @@
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace aspirefriday.Tests;
+namespace aspirifriday.Tests;
 
 internal static class JwtHelpers
 {

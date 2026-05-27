@@ -1,7 +1,7 @@
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace aspirefriday.Tests;
+namespace aspirifriday.Tests;
 
 [Timeout(30_000)]
 public class DotnetUserJwtConfigurationTests

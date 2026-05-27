@@ -5,7 +5,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://aspirefriday.dev.localhost:17002;http://aspirefriday.dev.localhost:15080",
+      "applicationUrl": "https://aspirifriday.dev.localhost:17002;http://aspirifriday.dev.localhost:15080",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
@@ -17,7 +17,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://aspirefriday.dev.localhost:15080",
+      "applicationUrl": "http://aspirifriday.dev.localhost:15080",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",

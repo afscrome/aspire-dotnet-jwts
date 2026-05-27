@@ -24,10 +24,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 📦 Restore
-        run: dotnet restore aspirefriday.slnx
+        run: dotnet restore aspirifriday.slnx
 
       - name: 🔨 Build
-        run: dotnet build aspirefriday.slnx --no-restore --configuration Release
+        run: dotnet build aspirifriday.slnx --no-restore --configuration Release
 
       - name: 🔒 Trust dev certs
         run: dotnet dev-certs https --trust
@@ -60,7 +60,7 @@ jobs:
         run: echo "VERSION=0.0.${{ github.run_number }}-preview" >> $GITHUB_OUTPUT
 
       - name: 📦 Pack
-        run: dotnet pack src/AspireFriday.Hosting.UserJwts/AspireFriday.Hosting.UserJwts.csproj --configuration Release --output ./nupkg -p:Version=${{ steps.version.outputs.VERSION }}
+        run: dotnet pack src/AspiriFriday.Hosting.UserJwts/AspiriFriday.Hosting.UserJwts.csproj --configuration Release --output ./nupkg -p:Version=${{ steps.version.outputs.VERSION }}
 
       - name: 🚀 Publish to GitHub Packages
         run: dotnet nuget push ./nupkg/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate

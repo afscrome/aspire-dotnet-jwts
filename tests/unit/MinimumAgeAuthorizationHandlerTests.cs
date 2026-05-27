@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using aspirefriday.ApiService;
+using aspirifriday.ApiService;
 using Microsoft.AspNetCore.Authorization;
 
-namespace aspirefriday.UnitTests;
+namespace aspirifriday.UnitTests;
 
 public class MinimumAgeAuthorizationHandlerTests
 {

@@ -4,7 +4,7 @@ using Aspire.Hosting.ApplicationModel;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace aspirefriday.UnitTests;
+namespace aspirifriday.UnitTests;
 
 public class SigningTokenResourceTests
 {
@@ -171,7 +171,7 @@ public class SigningTokenResourceTests
     public async Task GenerateJwtAsync_IncludesAudienceClaim_WhenConfigured()
     {
         var resource = CreateSigningKeyResource();
-        resource.DefaultClaims["aud"] = "aspirefriday-api";
+        resource.DefaultClaims["aud"] = "aspirifriday-api";
 
         var claims = new Dictionary<string, object>
         {

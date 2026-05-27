@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotnetAppWithAuth\aspirefriday.ApiService.csproj" />
-    <ProjectReference Include="..\..\src\AspireFriday.Hosting.UserJwts\AspireFriday.Hosting.UserJwts.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\DotnetAppWithAuth\aspirifriday.ApiService.csproj" />
+    <ProjectReference Include="..\..\src\AspiriFriday.Hosting.UserJwts\AspiriFriday.Hosting.UserJwts.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 
 </Project>

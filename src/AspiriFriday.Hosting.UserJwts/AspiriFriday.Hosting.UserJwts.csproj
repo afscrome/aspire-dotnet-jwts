@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
-    <PackageId>AspireFriday.Hosting.UserJwts</PackageId>
+    <PackageId>AspiriFriday.Hosting.UserJwts</PackageId>
     <Description>Aspire hosting integration for minting signed JWT bearer tokens via dashboard commands.</Description>
   </PropertyGroup>
 
