@@ -2,7 +2,7 @@
 
 `AspireFriday.Hosting.UserJwts` is a small Aspire hosting integration that gives you a `dotnet user-jwts`-style developer experience for distributed apps.
 
-Instead of running a CLI command, you add a resource command in your AppHost. From the Aspire dashboard, you can generate signed JWTs on demand and paste them directly into API calls.
+<video src="docs/demo.mp4" autoplay loop muted playsinline></video>
 
 ```cs
 var signingKey = builder.AddJwtSigningToken("signing-key");
@@ -15,9 +15,9 @@ resource.WithJwtToken(
     additionalClaims: new Dictionary<string, JwtClaimDefault>
     {
         ["aud"] = new("dotnetappwithauth"),
-        ["sub"] = new("dev-user", UserConfigurable: true, Label: "User ID", Description: "Value used for the sub claim."),
+        ["sub"] = new("", UserConfigurable: true, Label: "User ID", Description: "Value used for the sub claim."),
         ["age"] = new("18", UserConfigurable: true, Label: "Age claim", Description: "User's age used for authorization checks."),
-    })
+    });
 ```
 
 ## Why This Exists
@@ -81,7 +81,7 @@ builder.AddProject<Projects.MyApi>("api")
         signingKey,
         commandName: "jwt-user",
         displayName: "Generate User Token",
-        description: "Mint a signed user JWT for local API testing.",
+        description: "Generate a signed user JWT for local API testing.",
         additionalClaims: new Dictionary<string, JwtClaimDefault>
         {
             ["aud"] = new("my-api"),
