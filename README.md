@@ -1,6 +1,6 @@
 # AspiriFriday.Hosting.UserJwts
 
-`AspiriFriday.Hosting.UserJwts` is a small Aspire hosting integration that gives you a `dotnet user-jwts`-style developer experience for distributed apps.
+`AspiriFriday.Hosting.UserJwts` is a small Aspire hosting integration that gives you a `dotnet user-jwts`-style developer experience for distributed apps.  Initial version was built on [AspiriFriday](https://www.youtube.com/watch?v=RGBK63vn3Rc) stream.
 
 > [!WARNING]
 > This package is under active development. The API may change without notice.
