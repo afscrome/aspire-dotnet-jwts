@@ -6,14 +6,20 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  DOTNET_NOLOGO: true
-
 jobs:
   build-and-test:
     name: 🔨 Build & Test
     runs-on: ubuntu-latest
+    env:
+      ARTIFACTS_PATH: ${{ github.workspace }}/.artifacts/
+      BINLOG_PATH: ${{ github.workspace }}/.artifacts/binlogs/
+      TESTRESULTS_PATH: ${{ github.workspace }}/.artifacts/testresults/
+      NUGET_PACKAGES_PATH: ${{ github.workspace }}/artifacts/package/release/
+      NUGET_XMLDOC_MODE: skip
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+      TERM: xterm
 
     steps:
       - uses: actions/checkout@v7
@@ -23,18 +29,75 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: 📦 Restore
-        run: dotnet restore
+      - name: 🏷️ Calculate Version
+        id: version
+        run: echo "VERSION=0.0.${{ github.run_number }}-preview" >> $GITHUB_OUTPUT
+
+      - name: 📥 Restore
+        id: restore
+        run: |
+          dotnet restore \
+            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
+            --property:Version=${{ steps.version.outputs.VERSION }} \
+            --verbosity:minimal \
+            -bl:${{ env.BINLOG_PATH }}/restore.binlog
 
       - name: 🔨 Build
-        run: dotnet build --no-restore --configuration Release
+        id: build
+        run: |
+          dotnet build \
+            --no-restore \
+            --configuration Release \
+            --property:Version=${{ steps.version.outputs.VERSION }} \
+            --verbosity:minimal \
+            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
+            -bl:${{ env.BINLOG_PATH }}/build.binlog
 
       - name: 🔒 Trust dev certs
         run: dotnet dev-certs https --trust
         continue-on-error: true
 
       - name: 🧪 Test
-        run: dotnet test --no-restore --no-build --configuration Release
+        id: test
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --property:Version=${{ steps.version.outputs.VERSION }} \
+            --verbosity:minimal \
+            --artifacts-path=${{ env.ARTIFACTS_PATH }} \
+            -bl:${{ env.BINLOG_PATH }}/test.binlog \
+            --output Detailed \
+            --results-directory ${{ env.TESTRESULTS_PATH }}
+
+      - name: 📦 Pack
+        run: |
+          dotnet pack UserJwts.slnx \
+            --no-build \
+            --configuration Release \
+            --property:Version=${{ steps.version.outputs.VERSION }} \
+            --output ${{ env.NUGET_PACKAGES_PATH }}
+
+      - name: 📤 Upload NuGet packages
+        uses: actions/upload-artifact@v6
+        with:
+          name: NuGetPackages
+          path: ${{ env.ARTIFACTS_PATH }}/package/release/*.nupkg
+          if-no-files-found: error
+
+      - name: 📤 Publish binlogs (on failure)
+        uses: actions/upload-artifact@v6
+        if: ${{ steps.restore.outcome == 'failure' || steps.build.outcome == 'failure' || steps.test.outcome == 'failure' || runner.debug }}
+        with:
+          name: Binlogs-${{ github.job }}
+          path: ${{ env.BINLOG_PATH }}
+
+      - name: 📤 Publish test artifacts (on failure)
+        uses: actions/upload-artifact@v6
+        if: ${{ steps.test.outcome == 'failure' || runner.debug }}
+        with:
+          name: TestResults-${{ github.job }}
+          path: ${{ env.TESTRESULTS_PATH }}
 
   publish:
     name: 📦 Publish
@@ -45,8 +108,6 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v7
-
       - name: ⚙️ Setup .NET
         uses: actions/setup-dotnet@v5
         with:
@@ -55,12 +116,11 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🏷️ Calculate Version
-        id: version
-        run: echo "VERSION=0.0.${{ github.run_number }}-preview" >> $GITHUB_OUTPUT
-
-      - name: 📦 Pack
-        run: dotnet pack UserJwts.slnx --configuration Release -p:Version=${{ steps.version.outputs.VERSION }}
+      - name: 📥 Download packages
+        uses: actions/download-artifact@v5
+        with:
+          name: NuGetPackages
+          path: packages
 
       - name: 🚀 Publish to GitHub Packages
-        run: dotnet nuget push artifacts/pack/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        run: dotnet nuget push packages/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
