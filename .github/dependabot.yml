@@ -8,6 +8,14 @@ updates:
       aspire-hosting:
         patterns:
           - "Aspire.Hosting.*"
+      open-telemetry:
+        patterns:
+          - "OpenTelemetry"
+          - "OpenTelemetry.*"
+      microsoft-aspnetcore:
+        patterns:
+          - "Microsoft.AspNetCore"
+          - "Microsoft.AspNetCore.*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
