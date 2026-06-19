@@ -93,7 +93,7 @@ app.MapHealthChecks("/health");
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarUi();
+    app.MapScalarApiReference();
 }
 
 app.MapGet("/", () => Results.Redirect("/scalar/v1"))
