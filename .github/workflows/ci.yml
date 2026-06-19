@@ -24,17 +24,17 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 📦 Restore
-        run: dotnet restore AlexCrome.Aspire.slnx
+        run: dotnet restore
 
       - name: 🔨 Build
-        run: dotnet build AlexCrome.Aspire.slnx --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release
 
       - name: 🔒 Trust dev certs
         run: dotnet dev-certs https --trust
         continue-on-error: true
 
       - name: 🧪 Test
-        run: dotnet test --configuration Release
+        run: dotnet test --no-restore --no-build --configuration Release
 
   publish:
     name: 📦 Publish
@@ -60,7 +60,7 @@ jobs:
         run: echo "VERSION=0.0.${{ github.run_number }}-preview" >> $GITHUB_OUTPUT
 
       - name: 📦 Pack
-        run: dotnet pack src/AlexCrome.Aspire.Hosting.UserJwts.csproj --configuration Release --output ./nupkg -p:Version=${{ steps.version.outputs.VERSION }}
+        run: dotnet pack UserJwts.slnx --configuration Release -p:Version=${{ steps.version.outputs.VERSION }}
 
       - name: 🚀 Publish to GitHub Packages
-        run: dotnet nuget push ./nupkg/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        run: dotnet nuget push artifacts/pack/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
