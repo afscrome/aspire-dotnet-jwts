@@ -23,22 +23,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: ⚙️ Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
-      - name: 🏷️ Calculate Version
-        id: version
-        run: echo "VERSION=0.0.${{ github.run_number }}-preview" >> $GITHUB_OUTPUT
-
       - name: 📥 Restore
         id: restore
         run: |
           dotnet restore \
             --artifacts-path ${{ env.ARTIFACTS_PATH }} \
-            --property:Version=${{ steps.version.outputs.VERSION }} \
             --verbosity:minimal \
             -bl:${{ env.BINLOG_PATH }}/restore.binlog
 
@@ -48,7 +45,6 @@ jobs:
           dotnet build \
             --no-restore \
             --configuration Release \
-            --property:Version=${{ steps.version.outputs.VERSION }} \
             --verbosity:minimal \
             --artifacts-path ${{ env.ARTIFACTS_PATH }} \
             -bl:${{ env.BINLOG_PATH }}/build.binlog
@@ -63,7 +59,6 @@ jobs:
           dotnet test \
             --no-build \
             --configuration Release \
-            --property:Version=${{ steps.version.outputs.VERSION }} \
             --verbosity:minimal \
             --artifacts-path=${{ env.ARTIFACTS_PATH }} \
             -bl:${{ env.BINLOG_PATH }}/test.binlog \
@@ -79,7 +74,6 @@ jobs:
             --no-restore \
             --artifacts-path ${{ env.ARTIFACTS_PATH }} \
             --configuration Release \
-            --property:Version=${{ steps.version.outputs.VERSION }} \
             -bl:${{ env.BINLOG_PATH }}/pack.binlog \
             --output ${{ env.NUGET_PACKAGES_PATH }}
 
