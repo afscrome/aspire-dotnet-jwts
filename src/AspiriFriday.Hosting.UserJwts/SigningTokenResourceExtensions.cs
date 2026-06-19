@@ -1,8 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.IdentityModel.Tokens;
 
-#pragma warning disable ASPIREINTERACTION001
-
 namespace Aspire.Hosting;
 
 public static class SigningTokenResourceExtensions
@@ -80,4 +78,3 @@ public static class SigningTokenResourceExtensions
     }
 }
 
-#pragma warning restore ASPIREINTERACTION001
