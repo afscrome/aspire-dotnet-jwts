@@ -1,6 +1,13 @@
 <Solution>
-  <Project Path="playground/AppHost/AlexCrome.Aspire.Hosting.UserJwts.AppHost.csproj" />
-  <Project Path="playground/DotnetAppWithAuth/ApiService.csproj" />
-  <Project Path="tests/integration/AlexCrome.Aspire.Hosting.UserJwts.IntegrationTests.csproj" />
-  <Project Path="tests/unit/AlexCrome.Aspire.Hosting.UserJwts.UnitTests.csproj" />
+  <Folder Name="/playground/">
+    <Project Path="playground/AppHost/AlexCrome.Aspire.Hosting.UserJwts.AppHost.csproj" />
+    <Project Path="playground/DotnetAppWithAuth/ApiService.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AlexCrome.Aspire.Hosting.UserJwts.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/integration/AlexCrome.Aspire.Hosting.UserJwts.IntegrationTests.csproj" />
+    <Project Path="tests/unit/AlexCrome.Aspire.Hosting.UserJwts.UnitTests.csproj" />
+  </Folder>
 </Solution>
