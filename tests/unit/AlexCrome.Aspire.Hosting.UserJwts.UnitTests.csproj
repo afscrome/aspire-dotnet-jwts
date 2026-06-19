@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\playground\DotnetAppWithAuth\aspirifriday.ApiService.csproj" />
-    <ProjectReference Include="..\..\src\AspiriFriday.Hosting.UserJwts\AspiriFriday.Hosting.UserJwts.csproj" />
+    <ProjectReference Include="..\..\playground\DotnetAppWithAuth\ApiService.csproj" />
+    <ProjectReference Include="..\..\src\AlexCrome.Aspire.Hosting.UserJwts.csproj" />
   </ItemGroup>
 
 </Project>
