@@ -67,6 +67,7 @@ jobs:
             --verbosity:minimal \
             --artifacts-path=${{ env.ARTIFACTS_PATH }} \
             -bl:${{ env.BINLOG_PATH }}/test.binlog \
+            -- \
             --output Detailed \
             --results-directory ${{ env.TESTRESULTS_PATH }}
 
