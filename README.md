@@ -23,6 +23,13 @@ resource.WithJwtToken(
     });
 ```
 
+Getting tokens via aspire resource commands
+```bash
+aspire resource apiservice jwt-user
+aspire resource apiservice jwt-user --sub hello --age 21
+aspire resource apiservice jwt-user --help
+```
+
 ## Why This Exists
 
 `dotnet user-jwts` is great for local API auth workflows, but in distributed Aspire apps you often want token generation to be:

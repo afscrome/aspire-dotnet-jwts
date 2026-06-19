@@ -6,10 +6,6 @@ namespace aspirifriday.Tests;
 [Timeout(30_000)]
 public class DotnetUserJwtConfigurationTests
 {
-    // Missing test coverage around user configurable claims
-    // Requires mocking out IInteractionService
-    // But will be redundant in 13.4 once
-    
     [Test]
     public async Task SigningKeyResourceGenerateJwtProducesValidSignature(CancellationToken cancellationToken)
     {

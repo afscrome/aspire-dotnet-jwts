@@ -1,5 +1,4 @@
 using Aspire.Hosting.ApplicationModel;
-using Microsoft.Extensions.DependencyInjection;
 
 #pragma warning disable ASPIREINTERACTION001
 
@@ -28,20 +27,39 @@ public static class JwtResourceBuilderExtensions
             .WithEnvironment("Authentication__Schemes__Bearer__SigningKeys__0__Length", "32")
             .WithEnvironment("Authentication__Schemes__Bearer__ValidIssuers__0", signingToken.Resource.Issuer);
 
+        var configuredClaims = additionalClaims ?? new Dictionary<string, JwtClaimDefault>(StringComparer.Ordinal);
+
+        // Declare inputs for user-configurable claims so the dashboard prompts before execution.
+        var configurableInputs = configuredClaims
+            .Where(x => x.Value.UserConfigurable)
+            .Select(x => new InteractionInput
+            {
+                Name = x.Key,
+                Label = x.Value.Label ?? x.Key,
+                Description = x.Value.Description,
+                InputType = InputType.Text,
+                Value = x.Value.Value,
+                Required = true
+            })
+            .ToArray();
+
         builder.WithCommand(
             name: commandName,
             displayName: displayName,
             executeCommand: async context =>
             {
-                var resolvedClaims = await ResolveClaimsAsync(context, additionalClaims);
+                // Start with all defaults so non-configurable claims are always included.
+                var claims = configuredClaims
+                    .ToDictionary(x => x.Key, x => (object)x.Value.Value, StringComparer.Ordinal);
 
-                if (resolvedClaims.Canceled)
+                // Override with values submitted by the user for configurable claims.
+                foreach (var input in configurableInputs)
                 {
-                    return CommandResults.Canceled();
+                    claims[input.Name] = context.Arguments.GetString(input.Name) ?? input.Value ?? string.Empty;
                 }
 
                 var token = await signingToken.Resource.GenerateJwtAsync(
-                    resolvedClaims.Claims,
+                    claims,
                     context.CancellationToken);
 
                 return new ExecuteCommandResult
@@ -60,89 +78,11 @@ public static class JwtResourceBuilderExtensions
                 Description = description,
                 IconName = "Key",
                 IconVariant = IconVariant.Regular,
+                Arguments = configurableInputs,
             });
 
         return builder;
     }
-
-    private static IReadOnlyDictionary<string, string> MergeClaims(
-        IReadOnlyDictionary<string, object> resourceDefaults,
-        IReadOnlyDictionary<string, string> commandClaims)
-    {
-        var merged = new Dictionary<string, string>(StringComparer.Ordinal);
-
-        foreach (var (claimType, claimValue) in resourceDefaults)
-        {
-            merged[claimType] = claimValue?.ToString() ?? string.Empty;
-        }
-
-        foreach (var (claimType, claimValue) in commandClaims)
-        {
-            merged[claimType] = claimValue;
-        }
-
-        return merged;
-    }
-
-    private static async Task<(bool Canceled, Dictionary<string, object> Claims)> ResolveClaimsAsync(
-        ExecuteCommandContext context,
-        IDictionary<string, JwtClaimDefault>? additionalClaims)
-    {
-        var allConfiguredClaims = additionalClaims?.ToList() ?? [];
-        var promptClaims = allConfiguredClaims.Where(x => x.Value.UserConfigurable).ToList();
-
-        // Start with all defaults so non-configurable claims are always included.
-        var claims = allConfiguredClaims.ToDictionary(x => x.Key, x => (object)x.Value.Value);
-
-        if (promptClaims.Count > 0)
-        {
-            var interactionService = context.ServiceProvider.GetRequiredService<IInteractionService>();
-            if (!interactionService.IsAvailable)
-            {
-                throw new InvalidOperationException("Cannot prompt for claim values because the interaction service is not available.");
-            }
-
-            var configurableInputs = new List<InteractionInput>();
-
-            foreach (var (claimType, claimDefault) in promptClaims)
-            {
-                configurableInputs.Add(new InteractionInput
-                {
-                    Name = claimType,
-                    Label = claimDefault.Label ?? claimType,
-                    Description = claimDefault.Description,
-                    InputType = InputType.Text,
-                    Value = claimDefault.Value,
-                    Required = true
-                });
-            }
-
-            var result = await interactionService.PromptInputsAsync(
-                title: "Generate JWT",
-                message: "Configure claim values",
-                inputs: configurableInputs,
-                options: null,
-                cancellationToken: context.CancellationToken);
-
-            if (result.Canceled || result.Data is null)
-            {
-                return (true, claims);
-            }
-
-            foreach (var input in configurableInputs)
-            {
-                InteractionInput? configuredInput = null;
-                if (result.Data.TryGetByName(input.Name, out configuredInput) && configuredInput is not null)
-                {
-                    claims[input.Name] = configuredInput.Value ?? string.Empty;
-                }
-                else
-                {
-                    claims[input.Name] = input.Value ?? string.Empty;
-                }
-            }
-        }
-
-        return (false, claims);
-    }
 }
+
+#pragma warning restore ASPIREINTERACTION001
