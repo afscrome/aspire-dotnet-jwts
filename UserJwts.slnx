@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="playground/AppHost/AlexCrome.Aspire.Hosting.UserJwts.AppHost.csproj" />
+  <Project Path="playground/DotnetAppWithAuth/ApiService.csproj" />
+  <Project Path="tests/integration/AlexCrome.Aspire.Hosting.UserJwts.IntegrationTests.csproj" />
+  <Project Path="tests/unit/AlexCrome.Aspire.Hosting.UserJwts.UnitTests.csproj" />
+</Solution>

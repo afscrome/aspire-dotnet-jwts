@@ -1,6 +1,6 @@
-# AspiriFriday.Hosting.UserJwts
+# AlexCrome.Aspire.Hosting.UserJwts
 
-`AspiriFriday.Hosting.UserJwts` is a small Aspire hosting integration that gives you a `dotnet user-jwts`-style developer experience for distributed apps.  Initial version was built on [AspiriFriday](https://www.youtube.com/watch?v=RGBK63vn3Rc) stream.
+`AlexCrome.Aspire.Hosting.UserJwts` is a small Aspire hosting integration that gives you a `dotnet user-jwts`-style developer experience for distributed apps.  Initial version was built on [AspiriFriday](https://www.youtube.com/watch?v=RGBK63vn3Rc) stream.
 
 > [!WARNING]
 > This package is under active development. The API may change without notice.
@@ -51,20 +51,20 @@ This package provides that workflow.
 ## Key Differences
 
 - `dotnet user-jwts`: CLI-first (`dotnet user-jwts create ...`).
-- `AspiriFriday.Hosting.UserJwts`: dashboard-first (resource command in AppHost).
+- `AlexCrome.Aspire.Hosting.UserJwts`: dashboard-first (resource command in AppHost).
 
 - `dotnet user-jwts`: typically configured per API project.
-- `AspiriFriday.Hosting.UserJwts`: configured once in AppHost and shared across resources.
+- `AlexCrome.Aspire.Hosting.UserJwts`: configured once in AppHost and shared across resources.
 
 - `dotnet user-jwts`: you pass arguments each time.
-- `AspiriFriday.Hosting.UserJwts`: you define reusable command templates with optional interactive prompts.
+- `AlexCrome.Aspire.Hosting.UserJwts`: you define reusable command templates with optional interactive prompts.
 
 ## Install
 
 Add the package to your AppHost project:
 
 ```bash
-dotnet add package AspiriFriday.Hosting.UserJwts
+dotnet add package AlexCrome.Aspire.Hosting.UserJwts
 ```
 
 ## Quick Start

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
-    <PackageId>AspiriFriday.Hosting.UserJwts</PackageId>
+    <PackageId>AlexCrome.Aspire.Hosting.UserJwts</PackageId>
     <Description>Aspire hosting integration for minting signed JWT bearer tokens via dashboard commands.</Description>
   </PropertyGroup>
 
