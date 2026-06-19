@@ -80,6 +80,14 @@ var signingKey = builder.AddJwtSigningToken("signing-key");
 ```
 
 By default, the signing key is generated as a secret parameter and persisted for local reuse.
+You can also customize the signing token resource itself:
+
+```csharp
+var signingKey = builder.AddJwtSigningToken("signing-key")
+    .WithIssuer("my-issuer")
+    .WithDefaultLifetime(TimeSpan.FromMinutes(30))
+    .WithDefaultClaim("aud", "my-api");
+```
 
 ### 2. Attach JWT commands to a resource
 
