@@ -26,77 +26,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: ⚙️ Setup .NET
-        uses: actions/setup-dotnet@v5
+      - name: 🔨 Build .NET artifacts
+        uses: ./.github/actions/dotnet-build
         with:
           dotnet-version: '10.0.x'
-
-      - name: 📥 Restore
-        id: restore
-        run: |
-          dotnet restore \
-            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
-            --verbosity:minimal \
-            -bl:${{ env.BINLOG_PATH }}/restore.binlog
-
-      - name: 🔨 Build
-        id: build
-        run: |
-          dotnet build \
-            --no-restore \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
-            -bl:${{ env.BINLOG_PATH }}/build.binlog
-
-      - name: 🔒 Trust dev certs
-        run: dotnet dev-certs https --trust
-        continue-on-error: true
-
-      - name: 🧪 Test
-        id: test
-        run: |
-          dotnet test \
-            --no-build \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path=${{ env.ARTIFACTS_PATH }} \
-            -bl:${{ env.BINLOG_PATH }}/test.binlog \
-            -- \
-            --output Detailed \
-            --results-directory ${{ env.TESTRESULTS_PATH }}
-
-      - name: 📦 Pack
-        id: pack
-        run: |
-          dotnet pack UserJwts.slnx \
-            --no-build \
-            --no-restore \
-            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
-            --configuration Release \
-            -bl:${{ env.BINLOG_PATH }}/pack.binlog \
-            --output ${{ env.NUGET_PACKAGES_PATH }}
-
-      - name: 📤 Upload NuGet packages
-        uses: actions/upload-artifact@v6
-        with:
-          name: NuGetPackages
-          path: ${{ env.ARTIFACTS_PATH }}/package/release/*.nupkg
-          if-no-files-found: error
-
-      - name: 📤 Publish binlogs (on failure)
-        uses: actions/upload-artifact@v6
-        if: ${{ always() && (steps.restore.outcome == 'failure' || steps.build.outcome == 'failure' || steps.test.outcome == 'failure' || steps.pack.outcome == 'failure' || runner.debug) }}
-        with:
-          name: Binlogs-${{ github.job }}
-          path: ${{ env.BINLOG_PATH }}
-
-      - name: 📤 Publish test artifacts (on failure)
-        uses: actions/upload-artifact@v6
-        if: ${{ steps.test.outcome == 'failure' || runner.debug }}
-        with:
-          name: TestResults-${{ github.job }}
-          path: ${{ env.TESTRESULTS_PATH }}
+          solution-path: UserJwts.slnx
+          configuration: Release
 
   publish:
     name: 📦 Publish

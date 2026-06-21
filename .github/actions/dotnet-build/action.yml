@@ -1,0 +1,96 @@
+name: Dotnet build and test
+description: Setup .NET and run restore, build, test, and pack for CI
+
+inputs:
+  dotnet-version:
+    description: The .NET SDK version to install
+    required: false
+    default: "10.0.x"
+  solution-path:
+    description: Solution file to pack
+    required: false
+    default: "UserJwts.slnx"
+  configuration:
+    description: Build configuration
+    required: false
+    default: "Release"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Restore
+      id: restore
+      shell: bash
+      run: |
+        dotnet restore \
+          --artifacts-path ${{ env.ARTIFACTS_PATH }} \
+          --verbosity:minimal \
+          -bl:${{ env.BINLOG_PATH }}/restore.binlog
+
+    - name: Build
+      id: build
+      shell: bash
+      run: |
+        dotnet build \
+          --no-restore \
+          --configuration ${{ inputs.configuration }} \
+          --verbosity:minimal \
+          --artifacts-path ${{ env.ARTIFACTS_PATH }} \
+          -bl:${{ env.BINLOG_PATH }}/build.binlog
+
+    - name: Trust dev certs
+      shell: bash
+      run: dotnet dev-certs https --trust
+      continue-on-error: true
+
+    - name: Test
+      id: test
+      shell: bash
+      run: |
+        dotnet test \
+          --no-build \
+          --configuration ${{ inputs.configuration }} \
+          --verbosity:minimal \
+          --artifacts-path=${{ env.ARTIFACTS_PATH }} \
+          -bl:${{ env.BINLOG_PATH }}/test.binlog \
+          -- \
+          --output Detailed \
+          --results-directory ${{ env.TESTRESULTS_PATH }}
+
+    - name: Pack
+      id: pack
+      shell: bash
+      run: |
+        dotnet pack ${{ inputs.solution-path }} \
+          --no-build \
+          --no-restore \
+          --artifacts-path ${{ env.ARTIFACTS_PATH }} \
+          --configuration ${{ inputs.configuration }} \
+          -bl:${{ env.BINLOG_PATH }}/pack.binlog \
+          --output ${{ env.NUGET_PACKAGES_PATH }}
+
+    - name: Upload NuGet packages
+      uses: actions/upload-artifact@v6
+      with:
+        name: NuGetPackages
+        path: ${{ env.ARTIFACTS_PATH }}/package/release/*.nupkg
+        if-no-files-found: error
+
+    - name: Publish binlogs (on failure)
+      uses: actions/upload-artifact@v6
+      if: ${{ always() && (steps.restore.outcome == 'failure' || steps.build.outcome == 'failure' || steps.test.outcome == 'failure' || steps.pack.outcome == 'failure' || runner.debug) }}
+      with:
+        name: Binlogs-${{ github.job }}
+        path: ${{ env.BINLOG_PATH }}
+
+    - name: Publish test artifacts (on failure)
+      uses: actions/upload-artifact@v6
+      if: ${{ steps.test.outcome == 'failure' || runner.debug }}
+      with:
+        name: TestResults-${{ github.job }}
+        path: ${{ env.TESTRESULTS_PATH }}
