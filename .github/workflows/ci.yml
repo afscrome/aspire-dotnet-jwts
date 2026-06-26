@@ -78,21 +78,21 @@ jobs:
             --output ${{ env.NUGET_PACKAGES_PATH }}
 
       - name: 📤 Upload NuGet packages
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: NuGetPackages
           path: ${{ env.ARTIFACTS_PATH }}/package/release/*.nupkg
           if-no-files-found: error
 
       - name: 📤 Publish binlogs (on failure)
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: ${{ always() && (steps.restore.outcome == 'failure' || steps.build.outcome == 'failure' || steps.test.outcome == 'failure' || steps.pack.outcome == 'failure' || runner.debug) }}
         with:
           name: Binlogs-${{ github.job }}
           path: ${{ env.BINLOG_PATH }}
 
       - name: 📤 Publish test artifacts (on failure)
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: ${{ steps.test.outcome == 'failure' || runner.debug }}
         with:
           name: TestResults-${{ github.job }}
