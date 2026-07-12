@@ -77,26 +77,27 @@ jobs:
             -bl:${{ env.BINLOG_PATH }}/pack.binlog \
             --output ${{ env.NUGET_PACKAGES_PATH }}
 
-      - name: 📤 Upload NuGet packages
-        uses: actions/upload-artifact@v6
-        with:
-          name: NuGetPackages
-          path: ${{ env.ARTIFACTS_PATH }}/package/release/*.nupkg
-          if-no-files-found: error
+      - parallel:
+          - name: 📤 Upload NuGet packages
+            uses: actions/upload-artifact@v6
+            with:
+              name: NuGetPackages
+              path: ${{ env.ARTIFACTS_PATH }}/package/release/*.nupkg
+              if-no-files-found: error
 
-      - name: 📤 Publish binlogs (on failure)
-        uses: actions/upload-artifact@v6
-        if: ${{ always() && (steps.restore.outcome == 'failure' || steps.build.outcome == 'failure' || steps.test.outcome == 'failure' || steps.pack.outcome == 'failure' || runner.debug) }}
-        with:
-          name: Binlogs-${{ github.job }}
-          path: ${{ env.BINLOG_PATH }}
+          - name: 📤 Publish binlogs (on failure)
+            uses: actions/upload-artifact@v6
+            if: ${{ always() && (steps.restore.outcome == 'failure' || steps.build.outcome == 'failure' || steps.test.outcome == 'failure' || steps.pack.outcome == 'failure' || runner.debug) }}
+            with:
+              name: Binlogs-${{ github.job }}
+              path: ${{ env.BINLOG_PATH }}
 
-      - name: 📤 Publish test artifacts (on failure)
-        uses: actions/upload-artifact@v6
-        if: ${{ steps.test.outcome == 'failure' || runner.debug }}
-        with:
-          name: TestResults-${{ github.job }}
-          path: ${{ env.TESTRESULTS_PATH }}
+          - name: 📤 Publish test artifacts (on failure)
+            uses: actions/upload-artifact@v6
+            if: ${{ steps.test.outcome == 'failure' || runner.debug }}
+            with:
+              name: TestResults-${{ github.job }}
+              path: ${{ env.TESTRESULTS_PATH }}
 
   publish:
     name: 📦 Publish
@@ -116,7 +117,7 @@ jobs:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📥 Download packages
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: NuGetPackages
           path: packages
