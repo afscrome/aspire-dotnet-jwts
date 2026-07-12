@@ -117,7 +117,7 @@ jobs:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📥 Download packages
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: NuGetPackages
           path: packages
