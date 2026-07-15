@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: "weekly"
     groups:
+      dotnet-core:
+        patterns:
+          - "System.*"
+          - "Microsoft.AspNetCore.*"
+          - "Microsoft.Extensions.*"
       aspire-hosting:
         patterns:
           - "Aspire.Hosting"
@@ -13,12 +18,11 @@ updates:
         patterns:
           - "OpenTelemetry"
           - "OpenTelemetry.*"
-      microsoft-aspnetcore:
-        patterns:
-          - "Microsoft.AspNetCore"
-          - "Microsoft.AspNetCore.*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "dotnet-sdk"
+    directory: "/"
