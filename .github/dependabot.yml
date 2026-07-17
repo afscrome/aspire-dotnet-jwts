@@ -13,8 +13,9 @@ updates:
           - "Microsoft.Extensions.*"
       aspire-hosting:
         patterns:
-          - "Aspire.Hosting"
-          - "Aspire.Hosting.*"
+          - Aspire.AppHost.*
+          - Aspire.Hosting
+          - Aspire.Hosting.*
       open-telemetry:
         patterns:
           - "OpenTelemetry"
