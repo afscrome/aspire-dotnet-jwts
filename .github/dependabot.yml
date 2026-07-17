@@ -4,6 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "wednesday"
     groups:
       dotnet-core:
         patterns:
@@ -27,4 +28,6 @@ updates:
   - package-ecosystem: "dotnet-sdk"
     directory: "/"
     schedule:
-      interval: "weekly"
+      # Third tuesday of month
+      interval: "cron"
+      cronjob: "0 0 15-21 * 2"
