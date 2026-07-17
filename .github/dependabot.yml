@@ -28,6 +28,5 @@ updates:
   - package-ecosystem: "dotnet-sdk"
     directory: "/"
     schedule:
-      # Third tuesday of month
-      interval: "cron"
-      cronjob: "0 0 15-21 * 2"
+      interval: "weekly"
+      day: "wednesday"
