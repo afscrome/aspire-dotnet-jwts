@@ -8,6 +8,11 @@ on:
         required: false
         default: ''
         type: string
+      runs-on:
+        description: Runner label to use for the build job
+        required: false
+        default: ubuntu-latest
+        type: string
       solution-path:
         description: Solution or solution filter to build
         required: true
@@ -31,7 +36,7 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     outputs:
       nuget_package_artifact_id: ${{ steps.upload-nuget-packages.outputs.artifact-id }}
       publish_artifact_id: ${{ steps.upload-publish-artifacts.outputs.artifact-id }}
