@@ -128,6 +128,7 @@ jobs:
             --results-directory "${{ env.TESTRESULTS_PATH }}" \
             --coverage \
             --coverage-output-format cobertura \
+            --report-gh \
             --report-trx
         shell: bash
 
