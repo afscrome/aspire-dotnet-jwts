@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on:
+        runner:
           - ubuntu-latest
           - windows-latest
           - macos-latest
@@ -19,9 +19,9 @@ jobs:
     permissions:
       contents: read
     with:
-      artifact-prefix: ${{ matrix.runs-on }}-
-      job-name: ${{ matrix.runs-on }}
-      runs-on: ${{ matrix.runs-on }}
+      artifact-prefix: ${{ matrix.runner }}-
+      job-name: ${{ matrix.runner }}
+      runs-on: ${{ matrix.runner }}
 
   publish:
     name: 📦 Publish
