@@ -54,7 +54,7 @@ jobs:
       COVERAGE_REPORT_PATH: ${{ github.workspace }}/.artifacts/coverage-report
       ARTIFACT_PREFIX: ${{ inputs.artifact-prefix }}
       ARTIFACT_RETENTION_DAYS: ${{ github.ref_name == github.event.repository.default_branch && 90 || 7 }}
-      CommonMsbuildArguments: -tl:false -p:ContinuousIntegrationBuild=true
+      CommonMsbuildArguments: -tl:false --configuration Release --verbosity:minimal -p:ContinuousIntegrationBuild=true
       NUGET_XMLDOC_MODE: skip
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -84,68 +84,61 @@ jobs:
 
       - name: 📥 Restore
         id: restore
-        run: |
-          dotnet restore "${{ inputs.solution-path }}" \
-            ${{ env.CommonMsbuildArguments }} \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            --verbosity:minimal \
-            -bl:${{ env.BINLOG_PATH }}/restore.binlog
+        run: >-
+          dotnet restore "${{ inputs.solution-path }}"
+          ${{ env.CommonMsbuildArguments }}
+          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
+          -bl:${{ env.BINLOG_PATH }}/restore.binlog
         shell: bash
 
       - name: 🔨 Build
         id: build
-        run: |
-          dotnet build "${{ inputs.solution-path }}" \
-            ${{ env.CommonMsbuildArguments }} \
-            --no-restore \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            -bl:${{ env.BINLOG_PATH }}/build.binlog
+        run: >-
+          dotnet build "${{ inputs.solution-path }}"
+          ${{ env.CommonMsbuildArguments }}
+          --no-restore
+          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
+          -bl:${{ env.BINLOG_PATH }}/build.binlog
         shell: bash
 
       - wait: trust-dev-certs
 
       - name: 🧪 Test
         id: test
-        run: |
-          dotnet test --project "${{ inputs.solution-path }}" \
-            ${{ env.CommonMsbuildArguments }} \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            -bl:${{ env.BINLOG_PATH }}/test.binlog \
-            -- \
-            --output Detailed \
-            --results-directory "${{ env.TESTRESULTS_PATH }}" \
-            --coverage \
-            --coverage-output-format cobertura \
-            --report-gh \
-            --report-trx
+        run: >-
+          dotnet test --project "${{ inputs.solution-path }}"
+          ${{ env.CommonMsbuildArguments }}
+          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
+          -bl:${{ env.BINLOG_PATH }}/test.binlog
+          --
+          --output Detailed
+          --results-directory "${{ env.TESTRESULTS_PATH }}"
+          --coverage
+          --coverage-output-format cobertura
+          --report-gh
+          --report-trx
         shell: bash
 
       - name: 📦 Pack
         id: pack
-        run: |
-          dotnet pack "${{ inputs.solution-path }}" \
-            ${{ env.CommonMsbuildArguments }} \
-            --no-build \
-            --no-restore \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            --configuration Release \
-            -bl:${{ env.BINLOG_PATH }}/pack.binlog
+        run: >-
+          dotnet pack "${{ inputs.solution-path }}"
+          ${{ env.CommonMsbuildArguments }}
+          --no-build
+          --no-restore
+          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
+          -bl:${{ env.BINLOG_PATH }}/pack.binlog
         shell: bash
 
       - name: 🚀 Publish
         id: publish
-        run: |
-          dotnet publish "${{ inputs.solution-path }}" \
-            ${{ env.CommonMsbuildArguments }} \
-            --no-build \
-            --no-restore \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            --configuration Release \
-            -bl:${{ env.BINLOG_PATH }}/publish.binlog
+        run: >-
+          dotnet publish "${{ inputs.solution-path }}"
+          ${{ env.CommonMsbuildArguments }}
+          --no-build
+          --no-restore
+          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
+          -bl:${{ env.BINLOG_PATH }}/publish.binlog
         shell: bash
 
       - parallel:
