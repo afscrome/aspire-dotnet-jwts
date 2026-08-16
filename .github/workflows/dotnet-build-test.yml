@@ -46,8 +46,6 @@ jobs:
         uses: actions/setup-dotnet@v6
 
       - name: 🔒 Trust dev certs
-        id: trust-dev-certs
-        background: true
         run: dotnet dev-certs https --trust
         continue-on-error: true
 
@@ -70,8 +68,6 @@ jobs:
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
             -bl:${{ env.BINLOG_PATH }}/build.binlog
         shell: bash
-
-      - wait: trust-dev-certs
 
       - name: 🧪 Test
         id: test
