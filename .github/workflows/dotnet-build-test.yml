@@ -53,8 +53,13 @@ jobs:
       PUBLISH_PATH: ${{ github.workspace }}/artifacts/publish
       COVERAGE_REPORT_PATH: ${{ github.workspace }}/artifacts/coverage-report
       ARTIFACT_RETENTION_DAYS: ${{ github.ref_name == github.event.repository.default_branch && 90 || 7 }}
-      COMMON_MSBUILD_ARGUMENTS: --verbosity:minimal -p:Configuration=Release -p:ContinuousIntegrationBuild=true --artifacts-path $ARTIFACTS_PATH
+      COMMON_MSBUILD_ARGUMENTS: >-
+        --verbosity:minimal
+        -p:Configuration=Release
+        -p:ContinuousIntegrationBuild=true
+        --artifacts-path $ARTIFACTS_PATH
       # Including `-tl:false` on COMMON_MSBUILD_ARGUMENTS would be preferable, but doesn't work currently due to https://github.com/dotnet/sdk/issues/52114
+      # Disabling terminal logger is required to ensure the problem reports from `setup-dotnet` work correctly
       MSBUILDTERMINALLOGGER: false
       NUGET_XMLDOC_MODE: skip
       DOTNET_NOLOGO: true
@@ -88,7 +93,6 @@ jobs:
         run: >-
           dotnet restore "${{ inputs.solution-path }}"
           ${{ env.COMMON_MSBUILD_ARGUMENTS }}
-          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
           -bl:${{ env.BINLOG_PATH }}/restore.binlog
         shell: bash
 
@@ -98,7 +102,6 @@ jobs:
           dotnet build "${{ inputs.solution-path }}"
           ${{ env.COMMON_MSBUILD_ARGUMENTS }}
           --no-restore
-          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
           -bl:${{ env.BINLOG_PATH }}/build.binlog
         shell: bash
 
