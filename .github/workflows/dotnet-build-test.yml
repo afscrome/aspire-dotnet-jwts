@@ -8,6 +8,11 @@ on:
         required: false
         default: ''
         type: string
+      job-name:
+        description: Optional display name for the build job
+        required: false
+        default: ''
+        type: string
       runs-on:
         description: Runner label to use for the build job
         required: false
@@ -37,6 +42,7 @@ on:
 
 jobs:
   build-test:
+    name: ${{ inputs.job-name != '' && inputs.job-name || 'build-test' }}
     runs-on: ${{ inputs.runs-on }}
     outputs:
       nuget_package_artifact_id: ${{ steps.upload-nuget-packages.outputs.artifact-id }}
