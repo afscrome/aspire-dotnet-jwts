@@ -20,6 +20,7 @@ jobs:
       contents: read
     with:
       artifact-prefix: ${{ matrix.runs-on }}-
+      job-name: ${{ matrix.runs-on }}
       runs-on: ${{ matrix.runs-on }}
 
   publish:
