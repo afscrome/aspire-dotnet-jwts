@@ -55,7 +55,7 @@ jobs:
       ARTIFACT_RETENTION_DAYS: ${{ github.ref_name == github.event.repository.default_branch && 90 || 7 }}
       COMMON_MSBUILD_ARGUMENTS: >-
         --verbosity:minimal
-        --artifacts-path $ARTIFACTS_PATH
+        --artifacts-path:"${{ github.workspace }}/artifacts"
         -p:Configuration=Release
         -p:ContinuousIntegrationBuild=true
       NUGET_XMLDOC_MODE: skip
