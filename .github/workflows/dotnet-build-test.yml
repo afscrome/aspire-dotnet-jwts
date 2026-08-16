@@ -34,7 +34,6 @@ jobs:
         uses: actions/setup-dotnet@v6
 
       - name: 🔒 Trust dev certs
-        background: true
         run: dotnet dev-certs https --trust
         continue-on-error: true
 
@@ -57,8 +56,6 @@ jobs:
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
             -bl:${{ env.BINLOG_PATH }}/build.binlog
         shell: bash
-
-      - wait: 🔒 Trust dev certs
 
       - name: 🧪 Test
         id: test
@@ -89,67 +86,65 @@ jobs:
             -bl:${{ env.BINLOG_PATH }}/pack.binlog
         shell: bash
 
-      - parallel:
-          - name: 📤 Upload NuGet packages
-            uses: actions/upload-artifact@v7
-            if: ${{ hashFiles(format('{0}/**', env.PACK_PATH)) != '' }}
-            with:
-              name: NuGetPackages
-              path: ${{ env.PACK_PATH }}
-              if-no-files-found: error
+      - name: 📤 Upload NuGet packages
+        uses: actions/upload-artifact@v7
+        if: ${{ hashFiles(format('{0}/**', env.PACK_PATH)) != '' }}
+        with:
+          name: NuGetPackages
+          path: ${{ env.PACK_PATH }}
+          if-no-files-found: error
 
-          - name: 📤 Upload Publish Artifacts
-            uses: actions/upload-artifact@v7
-            if: ${{ hashFiles(format('{0}/**', env.PUBLISH_PATH)) != '' }}
-            with:
-              name: PublishArtifacts
-              path: ${{ env.PUBLISH_PATH }}
-              if-no-files-found: error
+      - name: 📤 Upload Publish Artifacts
+        uses: actions/upload-artifact@v7
+        if: ${{ hashFiles(format('{0}/**', env.PUBLISH_PATH)) != '' }}
+        with:
+          name: PublishArtifacts
+          path: ${{ env.PUBLISH_PATH }}
+          if-no-files-found: error
 
-          - name: 📤 Publish binlogs (on failure)
-            uses: actions/upload-artifact@v7
-            if: >-
-              ${{
-                always()
-                && (
-                  runner.debug
-                  || steps.restore.outcome == 'failure'
-                  || steps.build.outcome == 'failure'
-                  || steps.test.outcome == 'failure'
-                  || steps.pack.outcome == 'failure'
-                )
-              }}
-            with:
-              name: Binlogs-${{ github.job }}
-              path: ${{ env.BINLOG_PATH }}
+      - name: 📤 Publish binlogs (on failure)
+        uses: actions/upload-artifact@v7
+        if: >-
+          ${{
+            always()
+            && (
+              runner.debug
+              || steps.restore.outcome == 'failure'
+              || steps.build.outcome == 'failure'
+              || steps.test.outcome == 'failure'
+              || steps.pack.outcome == 'failure'
+            )
+          }}
+        with:
+          name: Binlogs-${{ github.job }}
+          path: ${{ env.BINLOG_PATH }}
 
-          - name: 📤 Publish test artifacts (on failure)
-            uses: actions/upload-artifact@v7
-            if: ${{ steps.test.outcome == 'failure' || runner.debug }}
-            with:
-              name: TestResults-${{ github.job }}
-              path: ${{ env.TESTRESULTS_PATH }}
+      - name: 📤 Publish test artifacts (on failure)
+        uses: actions/upload-artifact@v7
+        if: ${{ steps.test.outcome == 'failure' || runner.debug }}
+        with:
+          name: TestResults-${{ github.job }}
+          path: ${{ env.TESTRESULTS_PATH }}
 
-          - name: 📊 Generate coverage report
-            id: generate-coverage-report
-            uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
-            if: ${{ always() && steps.test.outcome != 'skipped' }}
-            with:
-              reports: ${{ env.TESTRESULTS_PATH }}/*.cobertura.xml
-              targetdir: ${{ env.COVERAGE_REPORT_PATH }}
-              reporttypes: HtmlInline;Cobertura;MarkdownSummaryGithub
-              title: Code Coverage
+      - name: 📊 Generate coverage report
+        id: generate-coverage-report
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
+        if: ${{ always() && steps.test.outcome != 'skipped' }}
+        with:
+          reports: ${{ env.TESTRESULTS_PATH }}/*.cobertura.xml
+          targetdir: ${{ env.COVERAGE_REPORT_PATH }}
+          reporttypes: HtmlInline;Cobertura;MarkdownSummaryGithub
+          title: Code Coverage
 
-      - parallel:
-          - name: 📤 Upload coverage report
-            uses: actions/upload-artifact@v7
-            if: ${{ steps.generate-coverage-report.outcome == 'success' }}
-            with:
-              name: CoverageReport
-              path: ${{ env.COVERAGE_REPORT_PATH }}
-              if-no-files-found: error
+      - name: 📤 Upload coverage report
+        uses: actions/upload-artifact@v7
+        if: ${{ steps.generate-coverage-report.outcome == 'success' }}
+        with:
+          name: CoverageReport
+          path: ${{ env.COVERAGE_REPORT_PATH }}
+          if-no-files-found: error
 
-          - name: 📝 Publish coverage summary
-            if: ${{ steps.generate-coverage-report.outcome == 'success' }}
-            run: cat "${{ env.COVERAGE_REPORT_PATH }}/SummaryGithub.md" >> "$GITHUB_STEP_SUMMARY"
-            shell: bash
+      - name: 📝 Publish coverage summary
+        if: ${{ steps.generate-coverage-report.outcome == 'success' }}
+        run: cat "${{ env.COVERAGE_REPORT_PATH }}/SummaryGithub.md" >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
