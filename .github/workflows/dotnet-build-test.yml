@@ -46,7 +46,9 @@ jobs:
         uses: actions/setup-dotnet@v6
 
       - name: 🔒 Trust dev certs
+        id: trust-dev-certs
         if: ${{ runner.os == 'Linux' }}
+        background: true
         run: |
           EXIT_CODE=0
           dotnet dev-certs https --trust || EXIT_CODE=$?
@@ -75,6 +77,8 @@ jobs:
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
             -bl:${{ env.BINLOG_PATH }}/build.binlog
         shell: bash
+
+      - wait: trust-dev-certs
 
       - name: 🧪 Test
         id: test
