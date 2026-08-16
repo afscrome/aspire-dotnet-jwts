@@ -72,9 +72,14 @@ jobs:
       - name: ⚙️ Setup .NET
         uses: actions/setup-dotnet@v6
 
+      - name: FAIL
+        id: trust-dev-certs
+        run: exit 123
+
+
       - name: 🔒 Trust dev certs
         id: trust-dev-certs
-        if: ${{ runner.os == 'Linux' }}
+        if: runner.os == 'Linux'
         background: true
         run: |
           EXIT_CODE=0
@@ -141,9 +146,12 @@ jobs:
           - name: 📤 Upload NuGet packages
             id: upload-nuget-packages
             uses: actions/upload-artifact@v7
-            if: ${{ hashFiles(format('{0}/**', env.PACK_PATH)) != '' }}
+            if: >-
+              always()
+              && steps.pack.outcome == 'success'
+              && hashFiles(format('{0}/**', env.PACK_PATH)) != ''
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}NuGetPackages
+              name: ${{ inputs.artifact-prefix }}NuGetPackages
               path: ${{ env.PACK_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
@@ -151,9 +159,12 @@ jobs:
           - name: 📤 Upload Publish Artifacts
             id: upload-publish-artifacts
             uses: actions/upload-artifact@v7
-            if: ${{ hashFiles(format('{0}/**', env.PUBLISH_PATH)) != '' }}
+            if: >-
+              always()
+              && steps.publish.outcome == 'success'
+              && hashFiles(format('{0}/**', env.PUBLISH_PATH)) != ''
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}PublishArtifacts
+              name: ${{ inputs.artifact-prefix }}PublishArtifacts
               path: ${{ env.PUBLISH_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
@@ -162,34 +173,45 @@ jobs:
             id: upload-binlogs
             uses: actions/upload-artifact@v7
             if: >-
-              ${{
-                always()
-                && (
-                  runner.debug
-                  || steps.restore.outcome == 'failure'
+              always()
+              && (
+                (runner.debug && steps.restore.outcome != 'skipped')
+                || (
+                  steps.restore.outcome == 'failure'
                   || steps.build.outcome == 'failure'
                   || steps.test.outcome == 'failure'
                   || steps.pack.outcome == 'failure'
-                )
-              }}
+                  || steps.publish.outcome == 'failure')
+              )
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}Binlogs-${{ github.job }}
+              name: ${{ inputs.artifact-prefix }}Binlogs-${{ github.job }}
               path: ${{ env.BINLOG_PATH }}
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📤 Publish test artifacts (on failure)
             id: upload-test-results
             uses: actions/upload-artifact@v7
-            if: ${{ steps.test.outcome == 'failure' || runner.debug }}
+            if: >-
+              always()
+              && (
+                steps.test.outcome == 'failure'
+                || (runner.debug && steps.test.outcome != 'skipped')
+              )
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}TestResults-${{ github.job }}
+              name: ${{ inputs.artifact-prefix }}TestResults-${{ github.job }}
               path: ${{ env.TESTRESULTS_PATH }}
+              if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📊 Generate coverage report
             id: generate-coverage-report
-            uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
-            if: ${{ always() && steps.test.outcome != 'skipped' && hashFiles(format('{0}/*.cobertura.xml', env.TESTRESULTS_PATH)) != '' }}
+            uses: danielpalme/ReportGenerator-GitHub-Action@5
+            if: >-
+              always()
+              && (
+                steps.test.outcome == 'success'
+                || hashFiles(format('{0}/*.cobertura.xml', env.TESTRESULTS_PATH) != '')
+              )
             with:
               reports: ${{ env.TESTRESULTS_PATH }}/*.cobertura.xml
               targetdir: ${{ env.COVERAGE_REPORT_PATH }}
@@ -200,14 +222,14 @@ jobs:
           - name: 📤 Upload coverage report
             id: upload-coverage-report
             uses: actions/upload-artifact@v7
-            if: ${{ steps.generate-coverage-report.outcome == 'success' }}
+            if: steps.generate-coverage-report.outcome == 'success'
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}CoverageReport
+              name: ${{ inputs.artifact-prefix }}Coverage
               path: ${{ env.COVERAGE_REPORT_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📝 Publish coverage summary
-            if: ${{ steps.generate-coverage-report.outcome == 'success' }}
+            if: steps.generate-coverage-report.outcome == 'success'
             run: cat "${{ env.COVERAGE_REPORT_PATH }}/SummaryGithub.md" >> "$GITHUB_STEP_SUMMARY"
             shell: bash
