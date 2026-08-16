@@ -12,17 +12,32 @@ on:
         description: Solution or solution filter to build
         required: true
         type: string
+    outputs:
+      nuget_package_artifact_id:
+        description: Artifact id for uploaded NuGet packages
+        value: ${{ jobs.build-test.outputs.nuget_package_artifact_id }}
+      publish_artifact_id:
+        description: Artifact id for uploaded publish output
+        value: ${{ jobs.build-test.outputs.publish_artifact_id }}
+      binlog_artifact_id:
+        description: Artifact id for uploaded binlogs
+        value: ${{ jobs.build-test.outputs.binlog_artifact_id }}
+      testresults_artifact_id:
+        description: Artifact id for uploaded test results
+        value: ${{ jobs.build-test.outputs.testresults_artifact_id }}
+      coverage_report_artifact_id:
+        description: Artifact id for uploaded coverage report
+        value: ${{ jobs.build-test.outputs.coverage_report_artifact_id }}
 
 jobs:
   build-test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+    runs-on: ubuntu-latest
+    outputs:
+      nuget_package_artifact_id: ${{ steps.upload-nuget-packages.outputs.artifact-id }}
+      publish_artifact_id: ${{ steps.upload-publish-artifacts.outputs.artifact-id }}
+      binlog_artifact_id: ${{ steps.upload-binlogs.outputs.artifact-id }}
+      testresults_artifact_id: ${{ steps.upload-test-results.outputs.artifact-id }}
+      coverage_report_artifact_id: ${{ steps.upload-coverage-report.outputs.artifact-id }}
     env:
       ARTIFACTS_PATH: ${{ github.workspace }}/.artifacts
       BINLOG_PATH: ${{ github.workspace }}/.artifacts/binlogs
@@ -121,24 +136,27 @@ jobs:
 
       - parallel:
           - name: 📤 Upload NuGet packages
+            id: upload-nuget-packages
             uses: actions/upload-artifact@v7
             if: ${{ hashFiles(format('{0}/**', env.PACK_PATH)) != '' }}
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}NuGetPackages-${{ matrix.os }}
+              name: ${{ env.ARTIFACT_PREFIX }}NuGetPackages
               path: ${{ env.PACK_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📤 Upload Publish Artifacts
+            id: upload-publish-artifacts
             uses: actions/upload-artifact@v7
             if: ${{ hashFiles(format('{0}/**', env.PUBLISH_PATH)) != '' }}
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}PublishArtifacts-${{ matrix.os }}
+              name: ${{ env.ARTIFACT_PREFIX }}PublishArtifacts
               path: ${{ env.PUBLISH_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📤 Publish binlogs (on failure)
+            id: upload-binlogs
             uses: actions/upload-artifact@v7
             if: >-
               ${{
@@ -152,15 +170,16 @@ jobs:
                 )
               }}
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}Binlogs-${{ github.job }}-${{ matrix.os }}
+              name: ${{ env.ARTIFACT_PREFIX }}Binlogs-${{ github.job }}
               path: ${{ env.BINLOG_PATH }}
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📤 Publish test artifacts (on failure)
+            id: upload-test-results
             uses: actions/upload-artifact@v7
             if: ${{ steps.test.outcome == 'failure' || runner.debug }}
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}TestResults-${{ github.job }}-${{ matrix.os }}
+              name: ${{ env.ARTIFACT_PREFIX }}TestResults-${{ github.job }}
               path: ${{ env.TESTRESULTS_PATH }}
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
@@ -176,10 +195,11 @@ jobs:
 
       - parallel:
           - name: 📤 Upload coverage report
+            id: upload-coverage-report
             uses: actions/upload-artifact@v7
             if: ${{ steps.generate-coverage-report.outcome == 'success' }}
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}CoverageReport-${{ matrix.os }}
+              name: ${{ env.ARTIFACT_PREFIX }}CoverageReport
               path: ${{ env.COVERAGE_REPORT_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}

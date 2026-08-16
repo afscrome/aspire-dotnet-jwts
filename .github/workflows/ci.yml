@@ -8,11 +8,18 @@ on:
 
 jobs:
   build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
     uses: ./.github/workflows/dotnet-build-test.yml
     permissions:
       contents: read
     with:
-      artifact-prefix: CI-
+      artifact-prefix: CI-${{ matrix.os }}-
       solution-path: UserJwts.slnx
 
   publish:
@@ -34,7 +41,7 @@ jobs:
       - name: 📥 Download packages
         uses: actions/download-artifact@v8
         with:
-          name: CI-NuGetPackages-ubuntu-latest
+          name: CI-ubuntu-latest-NuGetPackages
           path: packages
 
       - name: 🚀 Publish to GitHub Packages
