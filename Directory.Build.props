@@ -6,6 +6,7 @@
     <ArtifactPathLayout>true</ArtifactPathLayout>
     <IsPackable>false</IsPackable>
     <IsPublishable>false</IsPublishable>
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\$(MSBuildProjectName)\bin\**;$(MSBuildProjectDirectory)\$(MSBuildProjectName)\obj\**</DefaultItemExcludes>
   </PropertyGroup>
 </Project>
