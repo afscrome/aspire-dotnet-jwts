@@ -24,7 +24,6 @@ jobs:
     with:
       artifact-prefix: ${{ matrix.os }}-
       runs-on: ${{ matrix.runs-on }}
-      solution-path: UserJwts.slnx
 
   publish:
     name: 📦 Publish
