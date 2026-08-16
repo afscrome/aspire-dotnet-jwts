@@ -46,15 +46,16 @@ jobs:
       testresults_artifact_id: ${{ steps.upload-test-results.outputs.artifact-id }}
       coverage_report_artifact_id: ${{ steps.upload-coverage-report.outputs.artifact-id }}
     env:
-      ARTIFACTS_PATH: ${{ github.workspace }}/.artifacts
-      BINLOG_PATH: ${{ github.workspace }}/.artifacts/binlogs
-      TESTRESULTS_PATH: ${{ github.workspace }}/.artifacts/testresults
-      PACK_PATH: ${{ github.workspace }}/.artifacts/package/release
-      PUBLISH_PATH: ${{ github.workspace }}/.artifacts/publish
-      COVERAGE_REPORT_PATH: ${{ github.workspace }}/.artifacts/coverage-report
-      ARTIFACT_PREFIX: ${{ inputs.artifact-prefix }}
+      ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
+      BINLOG_PATH: ${{ github.workspace }}/artifacts/binlogs
+      TESTRESULTS_PATH: ${{ github.workspace }}/artifacts/testresults
+      PACK_PATH: ${{ github.workspace }}/artifacts/package/release
+      PUBLISH_PATH: ${{ github.workspace }}/artifacts/publish
+      COVERAGE_REPORT_PATH: ${{ github.workspace }}/artifacts/coverage-report
       ARTIFACT_RETENTION_DAYS: ${{ github.ref_name == github.event.repository.default_branch && 90 || 7 }}
-      CommonMsbuildArguments: --verbosity:minimal -p:Configuration=Release -p:ContinuousIntegrationBuild=true
+      COMMON_MSBUILD_ARGUMENTS: --verbosity:minimal -p:Configuration=Release -p:ContinuousIntegrationBuild=true --artifacts-path $ARTIFACTS_PATH
+      # Including `-tl:false` on COMMON_MSBUILD_ARGUMENTS would be preferable, but doesn't work currently due to https://github.com/dotnet/sdk/issues/52114
+      MSBUILDTERMINALLOGGER: false
       NUGET_XMLDOC_MODE: skip
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -86,7 +87,7 @@ jobs:
         id: restore
         run: >-
           dotnet restore "${{ inputs.solution-path }}"
-          ${{ env.CommonMsbuildArguments }}
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
           --artifacts-path "${{ env.ARTIFACTS_PATH }}"
           -bl:${{ env.BINLOG_PATH }}/restore.binlog
         shell: bash
@@ -95,7 +96,7 @@ jobs:
         id: build
         run: >-
           dotnet build "${{ inputs.solution-path }}"
-          ${{ env.CommonMsbuildArguments }}
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
           --no-restore
           --artifacts-path "${{ env.ARTIFACTS_PATH }}"
           -bl:${{ env.BINLOG_PATH }}/build.binlog
@@ -107,8 +108,7 @@ jobs:
         id: test
         run: >-
           dotnet test --project "${{ inputs.solution-path }}"
-          ${{ env.CommonMsbuildArguments }}
-          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
           -bl:${{ env.BINLOG_PATH }}/test.binlog
           --
           --output Detailed
@@ -123,10 +123,9 @@ jobs:
         id: pack
         run: >-
           dotnet pack "${{ inputs.solution-path }}"
-          ${{ env.CommonMsbuildArguments }}
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
           --no-build
           --no-restore
-          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
           -bl:${{ env.BINLOG_PATH }}/pack.binlog
         shell: bash
 
@@ -134,10 +133,9 @@ jobs:
         id: publish
         run: >-
           dotnet publish "${{ inputs.solution-path }}"
-          ${{ env.CommonMsbuildArguments }}
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
           --no-build
           --no-restore
-          --artifacts-path "${{ env.ARTIFACTS_PATH }}"
           -bl:${{ env.BINLOG_PATH }}/publish.binlog
         shell: bash
 
