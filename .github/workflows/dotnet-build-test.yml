@@ -130,7 +130,7 @@ jobs:
           --no-build
           --no-restore
           -bl:${{ env.BINLOG_PATH }}/pack.binlog
-          -p:WarnOnPackingNonPackableProject=false \
+          -p:WarnOnPackingNonPackableProject=false
         shell: bash
 
       - name: 🚀 Publish
