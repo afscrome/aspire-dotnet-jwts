@@ -13,6 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.GitHubActionsReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
 

@@ -8,96 +8,20 @@ on:
 
 jobs:
   build-and-test:
-    name: 🔨 Build & Test
-    runs-on: ubuntu-latest
-    env:
-      ARTIFACTS_PATH: ${{ github.workspace }}/.artifacts/
-      BINLOG_PATH: ${{ github.workspace }}/.artifacts/binlogs/
-      TESTRESULTS_PATH: ${{ github.workspace }}/.artifacts/testresults/
-      NUGET_PACKAGES_PATH: ${{ github.workspace }}/.artifacts/package/release/
-      NUGET_XMLDOC_MODE: skip
-      DOTNET_NOLOGO: true
-      DOTNET_CLI_TELEMETRY_OPTOUT: true
-      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
-      TERM: xterm
-
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: ⚙️ Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: 📥 Restore
-        id: restore
-        run: |
-          dotnet restore \
-            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
-            --verbosity:minimal \
-            -bl:${{ env.BINLOG_PATH }}/restore.binlog
-
-      - name: 🔨 Build
-        id: build
-        run: |
-          dotnet build \
-            --no-restore \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
-            -bl:${{ env.BINLOG_PATH }}/build.binlog
-
-      - name: 🔒 Trust dev certs
-        run: dotnet dev-certs https --trust
-        continue-on-error: true
-
-      - name: 🧪 Test
-        id: test
-        run: |
-          dotnet test \
-            --no-build \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path=${{ env.ARTIFACTS_PATH }} \
-            -bl:${{ env.BINLOG_PATH }}/test.binlog \
-            -- \
-            --output Detailed \
-            --results-directory ${{ env.TESTRESULTS_PATH }}
-
-      - name: 📦 Pack
-        id: pack
-        run: |
-          dotnet pack UserJwts.slnx \
-            --no-build \
-            --no-restore \
-            --artifacts-path ${{ env.ARTIFACTS_PATH }} \
-            --configuration Release \
-            -bl:${{ env.BINLOG_PATH }}/pack.binlog \
-            --output ${{ env.NUGET_PACKAGES_PATH }}
-
-      - parallel:
-          - name: 📤 Upload NuGet packages
-            uses: actions/upload-artifact@v7
-            with:
-              name: NuGetPackages
-              path: ${{ env.ARTIFACTS_PATH }}/package/release/*.nupkg
-              if-no-files-found: error
-
-          - name: 📤 Publish binlogs (on failure)
-            uses: actions/upload-artifact@v7
-            if: ${{ always() && (steps.restore.outcome == 'failure' || steps.build.outcome == 'failure' || steps.test.outcome == 'failure' || steps.pack.outcome == 'failure' || runner.debug) }}
-            with:
-              name: Binlogs-${{ github.job }}
-              path: ${{ env.BINLOG_PATH }}
-
-          - name: 📤 Publish test artifacts (on failure)
-            uses: actions/upload-artifact@v7
-            if: ${{ steps.test.outcome == 'failure' || runner.debug }}
-            with:
-              name: TestResults-${{ github.job }}
-              path: ${{ env.TESTRESULTS_PATH }}
+    name: 🏗️ Build and Test
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    uses: ./.github/workflows/dotnet-build-test.yml
+    permissions:
+      contents: read
+    with:
+      artifact-prefix: ${{ matrix.runner }}-
+      runs-on: ${{ matrix.runner }}
 
   publish:
     name: 📦 Publish
@@ -111,7 +35,6 @@ jobs:
       - name: ⚙️ Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -119,8 +42,9 @@ jobs:
       - name: 📥 Download packages
         uses: actions/download-artifact@v8
         with:
-          name: NuGetPackages
+          name: ubuntu-latest-NuGetPackages
           path: packages
 
       - name: 🚀 Publish to GitHub Packages
         run: dotnet nuget push packages/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        shell: bash
