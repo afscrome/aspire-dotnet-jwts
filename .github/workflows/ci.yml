@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-and-test:
+    name: Build & Test
     strategy:
       fail-fast: false
       matrix:
@@ -20,7 +21,6 @@ jobs:
       contents: read
     with:
       artifact-prefix: ${{ matrix.runner }}-
-      job-name: ${{ matrix.runner }}
       runs-on: ${{ matrix.runner }}
 
   publish:
