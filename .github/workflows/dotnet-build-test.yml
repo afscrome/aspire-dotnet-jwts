@@ -10,7 +10,6 @@ on:
 
 jobs:
   build-test:
-    name: 🔨 Build & Test
     runs-on: ubuntu-latest
     env:
       ARTIFACTS_PATH: ${{ github.workspace }}/.artifacts
