@@ -72,10 +72,6 @@ jobs:
       - name: ⚙️ Setup .NET
         uses: actions/setup-dotnet@v6
 
-      - name: FAIL
-        run: exit 123
-
-
       - name: 🔒 Trust dev certs
         id: trust-dev-certs
         if: runner.os == 'Linux'
@@ -168,7 +164,7 @@ jobs:
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-          - name: 📤 Publish binlogs (on failure)
+          - name: 📤 Publish binlogs (on failure or debug)
             id: upload-binlogs
             uses: actions/upload-artifact@v7
             if: >-
@@ -180,14 +176,15 @@ jobs:
                   || steps.build.outcome == 'failure'
                   || steps.test.outcome == 'failure'
                   || steps.pack.outcome == 'failure'
-                  || steps.publish.outcome == 'failure')
+                  || steps.publish.outcome == 'failure'
+                )
               )
             with:
               name: ${{ inputs.artifact-prefix }}Binlogs-${{ github.job }}
               path: ${{ env.BINLOG_PATH }}
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-          - name: 📤 Publish test artifacts (on failure)
+          - name: 📤 Publish test artifacts (on failure or debug)
             id: upload-test-results
             uses: actions/upload-artifact@v7
             if: >-
@@ -209,7 +206,7 @@ jobs:
               always()
               && (
                 steps.test.outcome == 'success'
-                || hashFiles(format('{0}/*.cobertura.xml', env.TESTRESULTS_PATH) != '')
+                || (steps.test.outcome == 'failure' && hashFiles(format('{0}/*.cobertura.xml', env.TESTRESULTS_PATH) != ''))
               )
             with:
               reports: ${{ env.TESTRESULTS_PATH }}/*.cobertura.xml
