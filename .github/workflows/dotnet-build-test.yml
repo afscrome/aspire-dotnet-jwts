@@ -46,14 +46,18 @@ jobs:
       testresults_artifact_id: ${{ steps.upload-test-results.outputs.artifact-id }}
       coverage_report_artifact_id: ${{ steps.upload-coverage-report.outputs.artifact-id }}
     env:
-      ARTIFACTS_PATH: ${{ github.workspace }}/.artifacts
-      BINLOG_PATH: ${{ github.workspace }}/.artifacts/binlogs
-      TESTRESULTS_PATH: ${{ github.workspace }}/.artifacts/testresults
-      PACK_PATH: ${{ github.workspace }}/.artifacts/package/release
-      PUBLISH_PATH: ${{ github.workspace }}/.artifacts/publish
-      COVERAGE_REPORT_PATH: ${{ github.workspace }}/.artifacts/coverage-report
-      ARTIFACT_PREFIX: ${{ inputs.artifact-prefix }}
+      ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
+      BINLOG_PATH: ${{ github.workspace }}/artifacts/binlogs
+      TESTRESULTS_PATH: ${{ github.workspace }}/artifacts/testresults
+      PACK_PATH: ${{ github.workspace }}/artifacts/package/release
+      PUBLISH_PATH: ${{ github.workspace }}/artifacts/publish
+      COVERAGE_REPORT_PATH: ${{ github.workspace }}/artifacts/coverage-report
       ARTIFACT_RETENTION_DAYS: ${{ github.ref_name == github.event.repository.default_branch && 90 || 7 }}
+      COMMON_MSBUILD_ARGUMENTS: >-
+        --verbosity:minimal
+        --artifacts-path:"${{ github.workspace }}/artifacts"
+        -p:Configuration=Release
+        -p:ContinuousIntegrationBuild=true
       NUGET_XMLDOC_MODE: skip
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -70,7 +74,7 @@ jobs:
 
       - name: 🔒 Trust dev certs
         id: trust-dev-certs
-        if: ${{ runner.os == 'Linux' }}
+        if: runner.os == 'Linux'
         background: true
         run: |
           EXIT_CODE=0
@@ -79,77 +83,70 @@ jobs:
             echo "dev-certs https --trust failed with exit code $EXIT_CODE"
             exit $EXIT_CODE
           fi
-        shell: bash
 
       - name: 📥 Restore
         id: restore
-        run: |
-          dotnet restore "${{ inputs.solution-path }}" \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            --verbosity:minimal \
-            -bl:${{ env.BINLOG_PATH }}/restore.binlog
-        shell: bash
+        run: >-
+          dotnet restore "${{ inputs.solution-path }}"
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
+          -bl:${{ env.BINLOG_PATH }}/restore.binlog
 
       - name: 🔨 Build
         id: build
-        run: |
-          dotnet build "${{ inputs.solution-path }}" \
-            --no-restore \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            -bl:${{ env.BINLOG_PATH }}/build.binlog
-        shell: bash
+        run: >-
+          dotnet build "${{ inputs.solution-path }}"
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
+          --no-restore
+          -bl:${{ env.BINLOG_PATH }}/build.binlog
 
       - wait: trust-dev-certs
 
       - name: 🧪 Test
         id: test
-        run: |
-          dotnet test --project "${{ inputs.solution-path }}" \
-            --configuration Release \
-            --verbosity:minimal \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            -bl:${{ env.BINLOG_PATH }}/test.binlog \
-            -- \
-            --output Detailed \
-            --results-directory "${{ env.TESTRESULTS_PATH }}" \
-            --coverage \
-            --coverage-output-format cobertura \
-            --report-gh \
-            --report-trx
-        shell: bash
+        run: >-
+          dotnet test --project "${{ inputs.solution-path }}"
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
+          -bl:${{ env.BINLOG_PATH }}/test.binlog
+          --
+          --output Detailed
+          --results-directory "${{ env.TESTRESULTS_PATH }}"
+          --coverage
+          --coverage-output-format cobertura
+          --report-gh
+          --report-trx
 
       - name: 📦 Pack
         id: pack
-        run: |
-          dotnet pack "${{ inputs.solution-path }}" \
-            --no-build \
-            --no-restore \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            --configuration Release \
-            -p:WarnOnPackingNonPackableProject=false \
-            -bl:${{ env.BINLOG_PATH }}/pack.binlog
-        shell: bash
+        run: >-
+          dotnet pack "${{ inputs.solution-path }}"
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
+          --no-build
+          --no-restore
+          -p:DeterministicTimestamp="$(git log -1 --pretty=%ct)"
+          -bl:${{ env.BINLOG_PATH }}/pack.binlog
+          -p:WarnOnPackingNonPackableProject=false
 
+      # IsTransformWebConfigDisabled: https://github.com/dotnet/sdk/issues/50139
       - name: 🚀 Publish
         id: publish
-        run: |
-          dotnet publish "${{ inputs.solution-path }}" \
-            --no-build \
-            --no-restore \
-            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
-            --configuration Release \
-            -bl:${{ env.BINLOG_PATH }}/publish.binlog
-        shell: bash
+        run: >-
+          dotnet publish "${{ inputs.solution-path }}"
+          ${{ env.COMMON_MSBUILD_ARGUMENTS }}
+          --no-build
+          --no-restore
+          -bl:${{ env.BINLOG_PATH }}/publish.binlog
+          -p:IsTransformWebConfigDisabled=true
 
       - parallel:
           - name: 📤 Upload NuGet packages
             id: upload-nuget-packages
             uses: actions/upload-artifact@v7
-            if: ${{ hashFiles(format('{0}/**', env.PACK_PATH)) != '' }}
+            if: >-
+              always()
+              && steps.pack.outcome == 'success'
+              && hashFiles(format('{0}/**', env.PACK_PATH)) != ''
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}NuGetPackages
+              name: ${{ inputs.artifact-prefix }}NuGetPackages
               path: ${{ env.PACK_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
@@ -157,45 +154,60 @@ jobs:
           - name: 📤 Upload Publish Artifacts
             id: upload-publish-artifacts
             uses: actions/upload-artifact@v7
-            if: ${{ hashFiles(format('{0}/**', env.PUBLISH_PATH)) != '' }}
+            if: >-
+              always()
+              && steps.publish.outcome == 'success'
+              && hashFiles(format('{0}/**', env.PUBLISH_PATH)) != ''
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}PublishArtifacts
+              name: ${{ inputs.artifact-prefix }}PublishArtifacts
               path: ${{ env.PUBLISH_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-          - name: 📤 Publish binlogs (on failure)
+          - name: 📤 Publish binlogs (on failure or debug)
             id: upload-binlogs
             uses: actions/upload-artifact@v7
             if: >-
-              ${{
-                always()
-                && (
-                  runner.debug
-                  || steps.restore.outcome == 'failure'
+              always()
+              && (
+                (runner.debug && steps.restore.outcome != 'skipped')
+                || (
+                  steps.restore.outcome == 'failure'
                   || steps.build.outcome == 'failure'
                   || steps.test.outcome == 'failure'
                   || steps.pack.outcome == 'failure'
+                  || steps.publish.outcome == 'failure'
                 )
-              }}
+              )
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}Binlogs-${{ github.job }}
+              name: ${{ inputs.artifact-prefix }}Binlogs-${{ github.job }}
               path: ${{ env.BINLOG_PATH }}
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-          - name: 📤 Publish test artifacts (on failure)
+          - name: 📤 Publish test artifacts (on failure or debug)
             id: upload-test-results
             uses: actions/upload-artifact@v7
-            if: ${{ steps.test.outcome == 'failure' || runner.debug }}
+            if: >-
+              always()
+              && (
+                steps.test.outcome == 'failure'
+                || (runner.debug && steps.test.outcome != 'skipped')
+              )
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}TestResults-${{ github.job }}
+              name: ${{ inputs.artifact-prefix }}TestResults-${{ github.job }}
               path: ${{ env.TESTRESULTS_PATH }}
+              if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📊 Generate coverage report
             id: generate-coverage-report
-            uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
-            if: ${{ always() && steps.test.outcome != 'skipped' }}
+            uses: danielpalme/ReportGenerator-GitHub-Action@5
+            if: >-
+              always()
+              && (
+                steps.test.outcome == 'success'
+                || (steps.test.outcome == 'failure' && hashFiles(format('{0}/*.cobertura.xml', env.TESTRESULTS_PATH) != ''))
+              )
             with:
               reports: ${{ env.TESTRESULTS_PATH }}/*.cobertura.xml
               targetdir: ${{ env.COVERAGE_REPORT_PATH }}
@@ -206,14 +218,14 @@ jobs:
           - name: 📤 Upload coverage report
             id: upload-coverage-report
             uses: actions/upload-artifact@v7
-            if: ${{ steps.generate-coverage-report.outcome == 'success' }}
+            if: steps.generate-coverage-report.outcome == 'success'
             with:
-              name: ${{ env.ARTIFACT_PREFIX }}CoverageReport
+              name: ${{ inputs.artifact-prefix }}Coverage
               path: ${{ env.COVERAGE_REPORT_PATH }}
               if-no-files-found: error
               retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
           - name: 📝 Publish coverage summary
-            if: ${{ steps.generate-coverage-report.outcome == 'success' }}
+            if: steps.generate-coverage-report.outcome == 'success'
             run: cat "${{ env.COVERAGE_REPORT_PATH }}/SummaryGithub.md" >> "$GITHUB_STEP_SUMMARY"
             shell: bash

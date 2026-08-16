@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
     <PackageId>AlexCrome.Aspire.Hosting.UserJwts</PackageId>
     <Description>Aspire hosting integration for minting signed JWT bearer tokens via dashboard commands.</Description>

@@ -1,12 +1,30 @@
 <Project>
+  <!-- General-->
   <PropertyGroup>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Authors>Alex Crome</Authors>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactPathLayout>true</ArtifactPathLayout>
+  </PropertyGroup>
+
+  <!-- Support solution level pack/publish -->
+  <PropertyGroup>
     <IsPackable>false</IsPackable>
     <IsPublishable>false</IsPublishable>
     <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\$(MSBuildProjectName)\bin\**;$(MSBuildProjectDirectory)\$(MSBuildProjectName)\obj\**</DefaultItemExcludes>
   </PropertyGroup>
+
+
+  <!-- Package / Source link-->
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Alex Crome</Authors>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+
+
 </Project>
