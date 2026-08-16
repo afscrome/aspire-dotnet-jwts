@@ -73,7 +73,6 @@ jobs:
         uses: actions/setup-dotnet@v6
 
       - name: FAIL
-        id: trust-dev-certs
         run: exit 123
 
 
