@@ -84,11 +84,7 @@ jobs:
       - name: 📥 Restore
         id: restore
         run: |
-          DOTNET_TARGET=()
-          if [ -n "${{ inputs.solution-path }}" ]; then
-            DOTNET_TARGET+=("${{ inputs.solution-path }}")
-          fi
-          dotnet restore "${DOTNET_TARGET[@]}" \
+          dotnet restore "${{ inputs.solution-path }}" \
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
             --verbosity:minimal \
             -bl:${{ env.BINLOG_PATH }}/restore.binlog
@@ -97,11 +93,7 @@ jobs:
       - name: 🔨 Build
         id: build
         run: |
-          DOTNET_TARGET=()
-          if [ -n "${{ inputs.solution-path }}" ]; then
-            DOTNET_TARGET+=("${{ inputs.solution-path }}")
-          fi
-          dotnet build "${DOTNET_TARGET[@]}" \
+          dotnet build "${{ inputs.solution-path }}" \
             --no-restore \
             --configuration Release \
             --verbosity:minimal \
@@ -114,11 +106,7 @@ jobs:
       - name: 🧪 Test
         id: test
         run: |
-          DOTNET_TARGET=()
-          if [ -n "${{ inputs.solution-path }}" ]; then
-            DOTNET_TARGET+=("${{ inputs.solution-path }}")
-          fi
-          dotnet test "${DOTNET_TARGET[@]}" \
+          dotnet test "${{ inputs.solution-path }}" \
             --configuration Release \
             --verbosity:minimal \
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
@@ -135,11 +123,7 @@ jobs:
       - name: 📦 Pack
         id: pack
         run: |
-          DOTNET_TARGET=()
-          if [ -n "${{ inputs.solution-path }}" ]; then
-            DOTNET_TARGET+=("${{ inputs.solution-path }}")
-          fi
-          dotnet pack "${DOTNET_TARGET[@]}" \
+          dotnet pack "${{ inputs.solution-path }}" \
             --no-build \
             --no-restore \
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
@@ -150,11 +134,7 @@ jobs:
       - name: 🚀 Publish
         id: publish
         run: |
-          DOTNET_TARGET=()
-          if [ -n "${{ inputs.solution-path }}" ]; then
-            DOTNET_TARGET+=("${{ inputs.solution-path }}")
-          fi
-          dotnet publish "${DOTNET_TARGET[@]}" \
+          dotnet publish "${{ inputs.solution-path }}" \
             --no-build \
             --no-restore \
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
