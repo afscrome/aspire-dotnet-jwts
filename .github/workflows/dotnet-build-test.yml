@@ -107,6 +107,17 @@ jobs:
             -bl:${{ env.BINLOG_PATH }}/pack.binlog
         shell: bash
 
+      - name: 🚀 Publish
+        id: publish
+        run: |
+          dotnet publish "${{ inputs.solution-path }}" \
+            --no-build \
+            --no-restore \
+            --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
+            --configuration Release \
+            -bl:${{ env.BINLOG_PATH }}/publish.binlog
+        shell: bash
+
       - parallel:
           - name: 📤 Upload NuGet packages
             uses: actions/upload-artifact@v7
