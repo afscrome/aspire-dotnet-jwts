@@ -46,8 +46,15 @@ jobs:
         uses: actions/setup-dotnet@v6
 
       - name: 🔒 Trust dev certs
-        run: dotnet dev-certs https --trust
-        continue-on-error: true
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          EXIT_CODE=0
+          dotnet dev-certs https --trust || EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 4 ]; then
+            echo "dev-certs https --trust failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
+        shell: bash
 
       - name: 📥 Restore
         id: restore
