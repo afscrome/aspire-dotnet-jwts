@@ -128,6 +128,7 @@ jobs:
             --no-restore \
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
             --configuration Release \
+            -p:WarnOnPackingNonPackableProject=true \
             -bl:${{ env.BINLOG_PATH }}/pack.binlog
         shell: bash
 
