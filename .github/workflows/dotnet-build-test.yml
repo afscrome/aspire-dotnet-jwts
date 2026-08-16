@@ -59,7 +59,7 @@ jobs:
             -bl:${{ env.BINLOG_PATH }}/build.binlog
         shell: bash
 
-      - wait: [trust-dev-certs]
+      - wait: trust-dev-certs
 
       - name: 🧪 Test
         id: test
