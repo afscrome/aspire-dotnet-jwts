@@ -73,8 +73,6 @@ jobs:
             -- \
             --output Detailed \
             --results-directory "${{ env.TESTRESULTS_PATH }}" \
-            --coverage \
-            --coverage-output-format cobertura \
             --report-gh \
             --report-trx
         shell: bash
@@ -134,7 +132,7 @@ jobs:
           - name: 📊 Generate coverage report
             id: generate-coverage-report
             uses: danielpalme/ReportGenerator-GitHub-Action@5.5.11
-            if: ${{ always() && steps.test.outcome != 'skipped' }}
+            if: ${{ false }}
             with:
               reports: ${{ env.TESTRESULTS_PATH }}/*.cobertura.xml
               targetdir: ${{ env.COVERAGE_REPORT_PATH }}
