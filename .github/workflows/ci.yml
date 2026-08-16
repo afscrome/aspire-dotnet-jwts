@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
     with:
+      artifact-prefix: CI-
       solution-path: UserJwts.slnx
 
   publish:
@@ -33,7 +34,7 @@ jobs:
       - name: 📥 Download packages
         uses: actions/download-artifact@v8
         with:
-          name: NuGetPackages
+          name: CI-NuGetPackages-ubuntu-latest
           path: packages
 
       - name: 🚀 Publish to GitHub Packages

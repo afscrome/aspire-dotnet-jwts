@@ -3,6 +3,11 @@ name: Dotnet Build & Test
 on:
   workflow_call:
     inputs:
+      artifact-prefix:
+        description: Optional prefix for published artifact names
+        required: false
+        default: ''
+        type: string
       solution-path:
         description: Solution or solution filter to build
         required: true
@@ -10,7 +15,14 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
     env:
       ARTIFACTS_PATH: ${{ github.workspace }}/.artifacts
       BINLOG_PATH: ${{ github.workspace }}/.artifacts/binlogs
@@ -18,6 +30,7 @@ jobs:
       PACK_PATH: ${{ github.workspace }}/.artifacts/package/release
       PUBLISH_PATH: ${{ github.workspace }}/.artifacts/publish
       COVERAGE_REPORT_PATH: ${{ github.workspace }}/.artifacts/coverage-report
+      ARTIFACT_PREFIX: ${{ inputs.artifact-prefix }}
       NUGET_XMLDOC_MODE: skip
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -92,7 +105,7 @@ jobs:
             uses: actions/upload-artifact@v7
             if: ${{ hashFiles(format('{0}/**', env.PACK_PATH)) != '' }}
             with:
-              name: NuGetPackages
+              name: ${{ env.ARTIFACT_PREFIX }}NuGetPackages-${{ matrix.os }}
               path: ${{ env.PACK_PATH }}
               if-no-files-found: error
 
@@ -100,7 +113,7 @@ jobs:
             uses: actions/upload-artifact@v7
             if: ${{ hashFiles(format('{0}/**', env.PUBLISH_PATH)) != '' }}
             with:
-              name: PublishArtifacts
+              name: ${{ env.ARTIFACT_PREFIX }}PublishArtifacts-${{ matrix.os }}
               path: ${{ env.PUBLISH_PATH }}
               if-no-files-found: error
 
@@ -118,14 +131,14 @@ jobs:
                 )
               }}
             with:
-              name: Binlogs-${{ github.job }}
+              name: ${{ env.ARTIFACT_PREFIX }}Binlogs-${{ github.job }}-${{ matrix.os }}
               path: ${{ env.BINLOG_PATH }}
 
           - name: 📤 Publish test artifacts (on failure)
             uses: actions/upload-artifact@v7
             if: ${{ steps.test.outcome == 'failure' || runner.debug }}
             with:
-              name: TestResults-${{ github.job }}
+              name: ${{ env.ARTIFACT_PREFIX }}TestResults-${{ github.job }}-${{ matrix.os }}
               path: ${{ env.TESTRESULTS_PATH }}
 
           - name: 📊 Generate coverage report
@@ -143,7 +156,7 @@ jobs:
             uses: actions/upload-artifact@v7
             if: ${{ steps.generate-coverage-report.outcome == 'success' }}
             with:
-              name: CoverageReport
+              name: ${{ env.ARTIFACT_PREFIX }}CoverageReport-${{ matrix.os }}
               path: ${{ env.COVERAGE_REPORT_PATH }}
               if-no-files-found: error
 
