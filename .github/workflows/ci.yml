@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build & Test
+    name: 🏗️ Build and Test
     strategy:
       fail-fast: false
       matrix:
