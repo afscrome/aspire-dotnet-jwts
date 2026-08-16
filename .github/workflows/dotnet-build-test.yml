@@ -37,7 +37,7 @@ on:
 
 jobs:
   build-test:
-    name: 🛠️ Dotnet Build Test Publish
+    name: 🛠️ Build & Test
     runs-on: ${{ inputs.runs-on }}
     outputs:
       nuget_package_artifact_id: ${{ steps.upload-nuget-packages.outputs.artifact-id }}
