@@ -106,7 +106,7 @@ jobs:
       - name: 🧪 Test
         id: test
         run: |
-          dotnet test "${{ inputs.solution-path }}" \
+          dotnet test --project "${{ inputs.solution-path }}" \
             --configuration Release \
             --verbosity:minimal \
             --artifacts-path "${{ env.ARTIFACTS_PATH }}" \
