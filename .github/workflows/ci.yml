@@ -23,6 +23,16 @@ jobs:
       artifact-prefix: ${{ matrix.runner }}-
       runs-on: ${{ matrix.runner }}
 
+  build-and-test-result:
+    name: ✅ Build and Test Result
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: always()
+    steps:
+      - name: Check build-and-test result
+        run: ${{ needs.build-and-test.result == 'success' }}
+        shell: bash
+
   publish:
     name: 📦 Publish
     runs-on: ubuntu-latest
