@@ -1,34 +1,40 @@
 version: 2
 updates:
-  - package-ecosystem: "nuget"
-    directory: "/"
+  - package-ecosystem: nuget
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "wednesday"
+      interval: weekly
+      day: wednesday
+    open-pull-requests-limit: 15
     groups:
       dotnet-core:
         patterns:
-          - "System.*"
-          - "Microsoft.AspNetCore.*"
-          - "Microsoft.Extensions.*"
-      aspire-hosting:
+          - System.*
+          - Microsoft.AspNetCore.*
+          - Microsoft.Extensions.*
+      aspire:
         patterns:
           - Aspire.AppHost.*
           - Aspire.Hosting
           - Aspire.Hosting.*
       open-telemetry:
         patterns:
-          - "OpenTelemetry"
-          - "OpenTelemetry.*"
+          - OpenTelemetry
+          - OpenTelemetry.*
+      microsoft-test-platform:
+        patterns:
+          - Microsoft.Testing.Extensions.*
+          - Microsoft.Testing.Platform
+          - Microsoft.Testing.Platform.*
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
 
-  - package-ecosystem: "dotnet-sdk"
-    directory: "/"
+  - package-ecosystem: dotnet-sdk
+    directory: /
     schedule:
       # Third tuesday of month
-      interval: "cron"
+      interval: cron
       cronjob: "0 0 15-21 * 2"
