@@ -18,7 +18,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.17.11" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
-    <PackageVersion Include="TUnit" Version="1.69.16" />
+    <PackageVersion Include="TUnit" Version="1.72.4" />
   </ItemGroup>
 
   <ItemGroup>
