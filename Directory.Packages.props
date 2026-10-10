@@ -7,8 +7,8 @@
     <PackageVersion Include="Aspire.Hosting" Version="13.6.1" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.GitHubActionsReport" Version="2.5.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.GitHubActionsReport" Version="2.5.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
